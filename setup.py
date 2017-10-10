@@ -16,18 +16,18 @@ tests_require=['pytest>=2.3'] #for testing
 PACKAGE_PATH = os.path.abspath(os.path.join(__file__, os.pardir))
 
 setup(
-    name='pymce',
+    name='drama',
     version='0.1.0',
     description='Outlier detection',
     author='Alireza',
-    url='https://github.com/vafaeiar/pymce',
-    packages=find_packages(PACKAGE_PATH, "pymce"),
-    package_dir={'pymce': 'pymce'},
+    url='https://github.com/vafaeiar/drama',
+    packages=find_packages(PACKAGE_PATH, "drama"),
+    package_dir={'drama': 'drama'},
     include_package_data=True,
     install_requires=requires,
     license='GPLv3',
     zip_safe=False,
-    keywords='pymce',
+    keywords='drama',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         "Intended Audience :: Science/Research",
