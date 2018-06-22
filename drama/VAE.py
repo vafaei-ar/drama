@@ -2,12 +2,13 @@ import numpy as np
 import gc
 import tensorflow as tf
 from util import *
+from tensorflow.contrib.layers import xavier_initializer
 
 class VariationalAutoEncoder(object):
 
 	def __init__(self,  network_architecture, 
 											transfer_fct=tf.nn.relu,
-											initializer = tf.contrib.layers.xavier_initializer(),
+											initializer = xavier_initializer(),
 		           				learning_rate = 0.001):
 
 		self.nn_rec, self.nn_gen = network_architecture[0], network_architecture[1]

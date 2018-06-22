@@ -2,8 +2,13 @@
 
 import os
 import sys
+import shutil
 from setuptools.command.test import test as TestCommand
 from setuptools import find_packages
+
+def remove_dir(dirpath):
+	if os.path.exists(dirpath) and os.path.isdir(dirpath):
+		  shutil.rmtree(dirpath)
 
 try:
     from setuptools import setup
@@ -41,3 +46,7 @@ setup(
         'Programming Language :: Python :: 3.3',
     ]
 )
+
+remove_dir('build')
+remove_dir('drama.egg-info')
+remove_dir('dist')
