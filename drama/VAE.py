@@ -1,7 +1,7 @@
 import numpy as np
 import gc
 import tensorflow as tf
-from util import *
+from utils import *
 from tensorflow.contrib.layers import xavier_initializer
 
 class VariationalAutoEncoder(object):
