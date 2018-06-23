@@ -20,50 +20,60 @@ file_names = [i.split('/')[-1][:-4] for i in fils]
 
 i = int(sys.argv[1])
 j = int(sys.argv[2])
-frac = float(0.5)
+frac = float(sys.argv[3])
 
-drama_all = []
-lof_all = np.zeros(3)
-ifr_all = np.zeros(3)
+if os.path.isfile('./outputs/nov_drama_'+file_names[i]+'_'+str(j)):
+    exit()
 
-print file_names[i]
+cond = True
+while cond:
 
-try:
-    data = sio.loadmat(fils[i])
-    X = data['X'].astype(float)
-    y = data['y'].astype(float)
+    try:
+        drama_all = []
+        lof_all = np.zeros(3)
+        ifr_all = np.zeros(3)
 
-except:
-    data = h5py.File(fils[i])
-    X = np.array(data['X']).T.astype(float)
-    y = np.array(data['y']).T.astype(float)
-          
-i_ind = np.argwhere((y == 0))[:,0]
-o_ind = np.argwhere((y != 0))[:,0]
+        print file_names[i]
 
-i_train,i_test = drm.random_choice(i_ind,frac)
+        try:
+            data = sio.loadmat(fils[i])
+            X = data['X'].astype(float)
+            y = data['y'].astype(float)
 
-train_idx = i_train
-test_idx = np.concatenate([i_test,o_ind])
-                                            
-X_train = X[train_idx]   
-y_train = y[train_idx]
-                                            
-X_test = X[test_idx]
-y_test = y[test_idx]
-                 
-res = drm.novelty_finder_all(X_train,X_test,n_slpit=4)
-arr,drts,metrs = drm.result_array(res,y_test,'real')
-drama_all.append(arr)
+        except:
+            data = h5py.File(fils[i])
+            X = np.array(data['X']).T.astype(float)
+            y = np.array(data['y']).T.astype(float)
+                  
+        i_ind = np.argwhere((y == 0))[:,0]
+        o_ind = np.argwhere((y != 0))[:,0]
 
-df = drm.sk_check(X,X,y,[1])
-for k,scr in enumerate(['AUC','MCC','RWS']):
-    lof_all[k] = df[scr][0]
-    ifr_all[k] = df[scr][1]
+        i_train,i_test = drm.random_choice(i_ind,frac)
 
-drama_all = np.array(drama_all)
+        train_idx = i_train
+        test_idx = np.concatenate([i_test,o_ind])
+                                                    
+        X_train = X[train_idx]   
+        y_train = y[train_idx]
+                                                    
+        X_test = X[test_idx]
+        y_test = y[test_idx]
+                         
+        res = drm.novelty_finder_all(X_train,X_test,n_slpit=4)
+        arr,drts,metrs = drm.result_array(res,y_test,'real')
+        drama_all.append(arr)
 
-np.save('./outputs/nov_drama_'+file_names[i]+'_'+str(j),drama_all)
-np.save('./outputs/nov_lof_'+file_names[i]+'_'+str(j),lof_all)
-np.save('./outputs/nov_ifr_'+file_names[i]+'_'+str(j),ifr_all)
+        df = drm.sk_check(X,X,y,[1])
+        for k,scr in enumerate(['AUC','MCC','RWS']):
+            lof_all[k] = df[scr][0]
+            ifr_all[k] = df[scr][1]
+
+        drama_all = np.array(drama_all)
+
+        np.save('./outputs/nov_drama_'+file_names[i]+'_'+str(j),drama_all)
+        np.save('./outputs/nov_lof_'+file_names[i]+'_'+str(j),lof_all)
+        np.save('./outputs/nov_ifr_'+file_names[i]+'_'+str(j),ifr_all)
+        cond = False
+    except:
+        pass
 
