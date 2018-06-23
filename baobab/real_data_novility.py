@@ -57,9 +57,9 @@ arr,drts,metrs = drm.result_array(res,y_test,'real')
 drama_all.append(arr)
 
 df = drm.sk_check(X,X,y,[1])
-for j,scr in enumerate(['AUC','MCC','RWS']):
-    lof_all[i,j] = df[scr][0]
-    ifr_all[i,j] = df[scr][1]
+for k,scr in enumerate(['AUC','MCC','RWS']):
+    lof_all[k] = df[scr][0]
+    ifr_all[k] = df[scr][1]
 
 drama_all = np.array(drama_all)
 

@@ -63,9 +63,9 @@ rws = drm.rws_score(y_test==1, o3)
 drama_all[i,2] = rws
 
 df = drm.sk_check(X,X,y,[1])
-for j,scr in enumerate(['AUC','MCC','RWS']):
-    lof_all[i,j] = df[scr][0]
-    ifr_all[i,j] = df[scr][1]
+for k,scr in enumerate(['AUC','MCC','RWS']):
+    lof_all[k] = df[scr][0]
+    ifr_all[k] = df[scr][1]
 
 
 np.save('./outputs/sup_drama_'+file_names[i]+'_'+str(j),drama_all)

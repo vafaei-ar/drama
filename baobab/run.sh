@@ -1,16 +1,16 @@
 #!/bin/env bash
 
-#SBATCH -J SGAN
-#SBATCH --partition=dpt-gpu
-#SBATCH --time=24:00:00
+#SBATCH -J DRAMA
+#SBATCH --get-user-env
+#SBATCH --ntasks=1
 #SBATCH --nodes=1
-#SBATCH --gres=gpu:pascal:1
-#SBATCH --mem=30000
+#SBATCH --cpus-per-task=1
+##SBATCH --constraint=V6
+#SBATCH -p dpt
+#SBATCH --output=slurm-test-%J.out
+#SBATCH -t 12:00:00
+#SBATCH --mem=4000
+##SBATCH --mail-type=FAIL
 
-#module load CUDA
-
-# if you need to know the allocated CUDA device, you can obtain it here:
-echo $CUDA_VISIBLE_DEVICES
-
-srun tfpython $1 $2 $3 $4 $5 $6 $7
+tfcpu $1 $2 $3 $4 $5 $6 $7
 
