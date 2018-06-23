@@ -62,11 +62,11 @@ while cond:
         o1,o2,o3 = drm.supervised_outlier_finder_all(X_train,y_train,X_test)
                                                     
         auc = roc_auc_score(y_test==1, o1)
-        drama_all[i,0] = auc
+        drama_all[0] = auc
         mcc = drm.MCC(y_test==1, o2)
-        drama_all[i,1] = mcc
+        drama_all[1] = mcc
         rws = drm.rws_score(y_test==1, o3)           
-        drama_all[i,2] = rws
+        drama_all[2] = rws
 
         df = drm.sk_check(X,X,y,[1])
         for k,scr in enumerate(['AUC','MCC','RWS']):
