@@ -1,6 +1,6 @@
 from splitters import *
 from outlier_finder import *
-from util import *
+from utils import *
 from signal_synthesis import *
 from NN import *
 from k_means import *

@@ -1,7 +1,7 @@
 import numpy as np
 import gc
 import tensorflow as tf
-from util import *
+from utils import *
 
 class AutoEncoder(object):
 	def __init__(self, network_architecture, activition=tf.nn.relu, 

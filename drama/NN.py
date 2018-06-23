@@ -1,7 +1,5 @@
 import numpy as np
 import tensorflow as tf
-from sklearn.cluster import SpectralClustering,AgglomerativeClustering,DBSCAN
-
 
 def nearest_neighbor(components, X, distance='L1'):
 

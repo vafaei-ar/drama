@@ -3,7 +3,7 @@ import numpy as np
 import gc
 from VAE import *
 from AE import *
-from util import *
+from utils import *
 
 class Splitter(object):
 	def __init__(self, X_train, reducer, clustering, z_dim=2, network_architecture=None):

@@ -1,7 +1,10 @@
 import sys
 import numpy as np
-from util import *
+from utils import *
 from splitters import Splitter
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.decomposition import PCA,TruncatedSVD,NMF,FastICA
+from scipy.stats import pearsonr
 
 DEBUG = True
 metrics = ['cityblock','L2','L4','braycurtis',
@@ -160,20 +163,23 @@ def outliers_latent(splitter,metrics):
 
     return distance
     
-from sklearn.cluster import AgglomerativeClustering
-from sklearn.decomposition import PCA,TruncatedSVD,NMF,FastICA
-#from sklearn.metrics import roc_auc_score
-from scipy.stats import pearsonr
-    
-def outlier_survey(X,drt,metrics,clustering=None,z_dim=2,space='both'):
-    
+def get_outliers(X,drt_name,metrics,clustering=None,z_dim=2,space='both'):
+
+    dim_rs ={'AE':'AE','VAE':'VAE','PCA':PCA(n_components=z_dim),'NMF':NMF(n_components=z_dim), 
+             'FastICA':FastICA(n_components=z_dim, max_iter=1000)}
+             
+   	if drt_name is not in dim_rs.keys():   		
+        print 'Selected dimensionality reduction name is not recognized \n'
+              'Please chose one from:',dim_rs.keys()
+        return
+        
     outliers = {'real':None,'latent':None}
     
     if clustering is None:
         agg = AgglomerativeClustering()
         clustering = agg.fit_predict
         
-    splitter = Splitter(X, reducer = drt, clustering = clustering, z_dim=z_dim)
+    splitter = Splitter(X, reducer = dim_rs[drt_name], clustering = clustering, z_dim=z_dim)
 
     # Splitting
     splitter.split(1,verbose=0,training_epochs=20)
@@ -190,18 +196,15 @@ def outlier_survey(X,drt,metrics,clustering=None,z_dim=2,space='both'):
     return outliers
 
 def outlier_find_best(X):
-    z_dim = 2
-    dim_rs ={'AE':'AE','VAE':'VAE','PCA':PCA(n_components=z_dim),'NMF':NMF(n_components=2), 
-             'FastICA':FastICA(n_components=2, max_iter=1000)}
 
     res = {'drt':[],'metric':[],'pr':[],'real':[],'latent':[]}
 
     num = X.shape[0]
     n_out = num//20
 
-    for dim_r, value in dim_rs.iteritems():
+    for drt in ['AE','VAE','PCA','NMF','FastICA']:
 
-        outliers_rep = outlier_survey(X,value,metrics)
+        outliers_rep = get_outliers(X,drt,metrics)
 
         for metr in metrics:
             o1 = outliers_rep['real'][metr]
