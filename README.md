@@ -19,12 +19,12 @@ $ python setup.py install
 
 
 <p align="center">
-  <img src="./images/ds9flow.jpg" width="800"/>
+  <img src="./images/pipeline.jpg" width="800"/>
 </p>
 
 
 <p align="center">
-  <img src="./images/Network_1.jpg" width="700"/>
+  <img src="./images/splitting.jpg" width="700"/>
 </p>
 
 
