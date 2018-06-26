@@ -274,6 +274,8 @@ def get_novelties(X_train,X,drt_name,metrics,clustering=None,n_slpit=2,z_dim=2,s
 
 def unsupervised_outlier_finder_all(X):
 
+    X = X/X.max()
+
     res = {'drt':[],'metric':[],'pr':[],'real':[],'latent':[]}
     
     drt_list = ['AE','VAE','PCA','NMF','FastICA']
@@ -328,7 +330,10 @@ def result_array(res,y,space):
         
     return arr,drts,metrs
 
-def supervised_outlier_finder_all(X_train,y_train,X_test):
+def supervised_outlier_finder_all(X_train,y_train,X_test):    
+    X_train = X_train/X_train.max()
+    X_test = X_test/X_test.max()
+    
     res = unsupervised_outlier_finder_all(X_train)        
         
     auc = []
@@ -372,6 +377,9 @@ def supervised_outlier_finder_all(X_train,y_train,X_test):
 
 def novelty_finder_all(X_train,X,n_slpit=2):
 
+    X_train = X_train/X_train.max()
+    X = X/X.max()
+
     res = {'drt':[],'metric':[],'pr':[],'real':[],'latent':[]}
     
     drt_list = ['AE','VAE','PCA','NMF','FastICA']
@@ -401,7 +409,7 @@ def novelty_finder_all(X_train,X,n_slpit=2):
 
     return res
 
-def plot_table(arr,drts,metrs,save=False):
+def plot_table(arr,drts,metrs,save=False,prefix=''):
     import matplotlib.pylab as plt
     
     crt = ['AUC','MCC','RWS']
@@ -431,4 +439,4 @@ def plot_table(arr,drts,metrs,save=False):
 
         plt.title(crt[iii]+r' ($\%$)',fontsize=25)
         if save:
-            plt.savefig(crt[iii]+'.jpg',dpi=150,bbox_inches='tight')
+            plt.savefig(prefix+crt[iii]+'.jpg',dpi=150,bbox_inches='tight')
