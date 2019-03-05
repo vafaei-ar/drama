@@ -22,7 +22,7 @@ fils = sorted(glob.glob('../data/*.mat'), key=os.path.getsize)
 n_files = len(fils)
 file_names = [i.split('/')[-1][:-4] for i in fils]
 
-if os.path.exists(dir_add+file_names[ii]+'_'+str(n_train)+'_'+str(nn)):
+if os.path.exists(dir_add+file_names[ii]+'_'+str(n_train)+'_'+str(nn)+'.npy'):
     exit()
     
 print(file_names[ii])
