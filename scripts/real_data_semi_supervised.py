@@ -15,10 +15,16 @@ ii = int(sys.argv[1])
 n_train = int(sys.argv[2])
 nn = int(sys.argv[3])
 
+dir_add = './'+sys.argv[0][:-3]+'_res/'
+drm.ch_mkdir(dir_add)
+
 fils = sorted(glob.glob('../data/*.mat'), key=os.path.getsize)
 n_files = len(fils)
 file_names = [i.split('/')[-1][:-4] for i in fils]
 
+if os.path.exists(dir_add+file_names[ii]+'_'+str(n_train)+'_'+str(nn)):
+    exit()
+    
 print(file_names[ii])
 
 try:
@@ -89,9 +95,6 @@ acc = drm.roc_auc_score(y_test==1, o1)
 mcc = drm.MCC(y_test==1, o1)
 rws = drm.rws_score(y_test==1, o1)
 print(acc,mcc,rws)
-
-dir_add = './'+sys.argv[0][:-3]+'_res/'
-drm.ch_mkdir(dir_add)
 
 np.save(dir_add+file_names[ii]+'_'+str(n_train)+'_'+str(nn),[acc,mcc,rws])
 
