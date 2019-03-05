@@ -90,7 +90,7 @@ mcc = drm.MCC(y_test==1, o1)
 rws = drm.rws_score(y_test==1, o1)
 print(acc,mcc,rws)
 
-dir_add = './'+sys.argv[0]+'_res/'
+dir_add = './'+sys.argv[0][:-3]+'_res/'
 drm.ch_mkdir(dir_add)
 
 np.save(dir_add+file_names[ii]+'_'+str(n_train)+'_'+str(nn),[acc,mcc,rws])
