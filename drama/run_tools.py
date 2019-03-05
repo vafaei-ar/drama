@@ -1,4 +1,8 @@
-from signal_synthesis import *
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+from .signal_synthesis import *
 import numpy as np
 
 def synt_event(i_sig, n_ftrs,x=None,n_inlier=2000,n_outlier=100,

@@ -1,9 +1,13 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import sys
 import numpy as np
 import gc
-from VAE import *
-from AE import *
-from utils import *
+from .VAE import *
+from .AE import *
+from .utils import *
 
 class Splitter(object):
 	def __init__(self, X_train, reducer, clustering, z_dim=2, network_architecture=None):
@@ -168,7 +172,7 @@ class Splitter(object):
 
 			self.step += 1
 			if verbose:
-				print 'Split level:',self.step
+				print ('Split level:',self.step)
 
 			if save is not None:
 				name = 'level'+str(self.step)
@@ -209,8 +213,8 @@ class Splitter(object):
 					break
 				self.step += 1
 				if verbose:
-					print '--------------------------'
-					print 'Split level: ',self.step
+					print ('--------------------------')
+					print ('Split level: ',self.step)
 					
 				X0 = []
 				z_mu0 = []

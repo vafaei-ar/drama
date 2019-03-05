@@ -1,3 +1,7 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import numpy as np
 from scipy.signal import *
 
@@ -45,7 +49,7 @@ def signal(i,x,sigma,n1,n2,n3,n4):
 		  out = out+1
 
 	else:
-		  print 'ERROR!'
+		  print ('ERROR!')
 		  return
 	#     out = srange(out)
 	out = n3*(out-n4)+n

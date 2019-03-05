@@ -1,7 +1,11 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import numpy as np
 import gc
 import tensorflow as tf
-from utils import *
+from .utils import *
 
 class AutoEncoder(object):
 	def __init__(self, network_architecture, activition=tf.nn.relu, 
@@ -136,7 +140,7 @@ class AutoEncoder(object):
 				flushout('Epoch: %d, cost= %5g',(self.epoch_total, c))
 
 		if verbose:
-			print 
+			print ()
 
 	def save(self, path):
 #    path = os.path.join(path, 'model.cpkt')

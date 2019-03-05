@@ -1,7 +1,11 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import sys
 import numpy as np
-from utils import *
-from splitters import Splitter
+from .utils import *
+from .splitters import Splitter
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import PCA,TruncatedSVD,NMF,FastICA
 from scipy.stats import pearsonr
@@ -28,8 +32,8 @@ def sk_check(X_train,X_test,y_test,o_list):
     n_row = 2
     index = np.arange(n_row) # array of numbers for the number of samples
     df = DataFrame(columns=columns, index = index)
-
-    exec 'T_o ='+(' | '.join(['(y_test=='+str(i)+')' for i in o_list]))
+    y_test = np.array(y_test)
+    exec('T_o ='+(' | '.join(['(y_test=='+str(i)+')' for i in o_list])),locals(),globals())
 
     auc_max = -1
     for i in range(3):
@@ -105,7 +109,7 @@ def outliers_real(X,splitter,metrics):
             distance[metric] = distance_test
           
             if np.any(np.isnan(distance_test)) and DEBUG:
-                print 'There is a problem with '+metric
+                print('There is a problem with '+metric)
                 return distance_test
           
         elif metric in wmetrics:
@@ -113,7 +117,7 @@ def outliers_real(X,splitter,metrics):
             distance[metric] = distance_test
             
             if np.any(np.isnan(distance_test)) and DEBUG:
-                print 'There is a problem with '+metric
+                print('There is a problem with '+metric)
                 return distance_test
 
     return distance
@@ -195,7 +199,7 @@ def outliers_latent(splitter,metrics):
             distance[metric] = distance_test 
                        
             if np.any(np.isnan(distance_test)) and DEBUG:
-                print 'There is a problem with '+metric
+                print('There is a problem with '+metric)
                 return distance_test
 
         elif metric in wmetrics:
@@ -203,7 +207,7 @@ def outliers_latent(splitter,metrics):
             distance[metric] = distance_test
             
             if np.any(np.isnan(distance_test)) and DEBUG:
-                print 'There is a problem with '+metric
+                print('There is a problem with '+metric)
                 return distance_test
 
     return distance
@@ -214,8 +218,8 @@ def get_outliers(X,drt_name,metrics,clustering=None,z_dim=2,space='both'):
              'FastICA':FastICA(n_components=z_dim, max_iter=1000)}
              
     if drt_name not in dim_rs.keys():   		
-        print 'Selected dimensionality reduction name is not recognized \n'+\
-              'Please chose one from:',dim_rs.keys()
+        print('Selected dimensionality reduction name is not recognized \n'+\
+              'Please choose one from:',dim_rs.keys())
         return
         
     outliers = {'real':None,'latent':None}
@@ -246,8 +250,8 @@ def get_novelties(X_train,X,drt_name,metrics,clustering=None,n_slpit=2,z_dim=2,s
              'FastICA':FastICA(n_components=z_dim, max_iter=1000)}
              
     if drt_name not in dim_rs.keys():   		
-        print 'Selected dimensionality reduction name is not recognized \n'+\
-              'Please chose one from:',dim_rs.keys()
+        print('Selected dimensionality reduction name is not recognized \n'+\
+              'Please chose one from:',dim_rs.keys())
         return
         
     outliers = {'real':None,'latent':None}
@@ -428,8 +432,8 @@ def plot_table(arr,drts,metrs,save=False,prefix=''):
 
         rnk = 50-mtx.ravel().argsort().argsort().reshape(mtx.shape)
 
-        for x in xrange(width):
-            for y in xrange(height):
+        for x in range(width):
+            for y in range(height):
                 ax.annotate('{:3.1f}\n rank: {:d}'.format(100*mtx[x][y],rnk[x][y]), xy=(y, x), 
                             horizontalalignment='center',
                             verticalalignment='center',fontsize=20);

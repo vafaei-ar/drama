@@ -1,7 +1,11 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import numpy as np
 import gc
 import tensorflow as tf
-from utils import *
+from .utils import *
 from tensorflow.contrib.layers import xavier_initializer
 
 class VariationalAutoEncoder(object):
@@ -201,7 +205,7 @@ class VariationalAutoEncoder(object):
 				flushout('Epoch: %d, cost= %5g',(epoch+1, avg_cost))
 
 		if verbose:
-			print 
+			print ()
 
 	def save(self, path):
 #    path = os.path.join(path, 'model.cpkt')
