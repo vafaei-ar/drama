@@ -41,16 +41,22 @@ iinds = np.argwhere(y[:,0]==0)[:,0]
 oinds = np.argwhere(y[:,0]==1)[:,0]
 nhalf = iinds.shape[0]//2
 
+if oinds.shape[0]<=n_train:
+    np.save(dir_add+file_names[ii]+'_'+str(n_train)+'_'+str(nn),[np.nan,np.nan,np.nan])
+    exit()
+
 np.random.shuffle(iinds)
 np.random.shuffle(oinds)
 
 X_train = np.concatenate([X[iinds[:nhalf]],X[oinds[:n_train]]],axis=0)
 y_train = np.concatenate([y[iinds[:nhalf]],y[oinds[:n_train]]],axis=0)
-X_test = np.concatenate([X[iinds[nhalf:]],X[oinds[n_train:]]],axis=0)
-y_test = np.concatenate([y[iinds[nhalf:]],y[oinds[n_train:]]],axis=0)
+X_test = np.concatenate([X[iinds[:]],X[oinds[n_train:]]],axis=0)
+y_test = np.concatenate([y[iinds[:]],y[oinds[n_train:]]],axis=0)
 
 X_train = X_train/X_train.max()
 X_test = X_test/X_test.max()
+
+df = drm.sk_check(X_test,X_test,y_test,[1])
 
 res = drm.unsupervised_outlier_finder_all(X_train)        
 
@@ -92,10 +98,10 @@ res = drm.get_outliers(X_test,rws_set[1],rws_set[2],clustering=None,z_dim=2,spac
 o3 = res[rws_set[0]][rws_set[2]]
 
 acc = drm.roc_auc_score(y_test==1, o1)
-mcc = drm.MCC(y_test==1, o1)
-rws = drm.rws_score(y_test==1, o1)
+mcc = drm.MCC(y_test==1, o2)
+rws = drm.rws_score(y_test==1, o3)
 print(acc,mcc,rws)
 
-np.save(dir_add+file_names[ii]+'_'+str(n_train)+'_'+str(nn),[acc,mcc,rws])
+drm.save(dir_add+file_names[ii]+'_'+str(n_train)+'_'+str(nn),[acc,mcc,rws,df])
 
 
