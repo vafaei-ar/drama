@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import os
 import sys
+import pickle
 import numpy as np
 from scipy.ndimage.filters import gaussian_filter1d as gauss_f
 from scipy.signal import argrelextrema
@@ -13,6 +14,18 @@ from sklearn.metrics import matthews_corrcoef
 COLORS = ['r','b','g','y','plum','sienna','darkolivegreen',
 'orange','cyan','violet','lime','darkblue','maroon','greenyellow','lightpink','thistle']
 
+
+def save(filename,data):
+    with open(filename+'.pickle', 'wb') as handle:
+        pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+def load(filename):
+    handle = open(filename+'.pickle', 'rb')
+    try:
+        return pickle.load(handle)
+    except:
+        return pickle.load(handle, encoding='latin1')
+        
 def ch_mkdir(directory):
     if not os.path.exists(directory):
           os.makedirs(directory)
