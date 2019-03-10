@@ -28,7 +28,10 @@ def load(filename):
         
 def ch_mkdir(directory):
     if not os.path.exists(directory):
-          os.makedirs(directory)
+        try:
+            os.makedirs(directory)
+        except:
+            print('could not make the directory!')
 
 def rws_score(outliers,v,n_o=None):
     if n_o is None:
