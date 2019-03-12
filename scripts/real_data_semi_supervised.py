@@ -42,7 +42,8 @@ oinds = np.argwhere(y[:,0]==1)[:,0]
 nhalf = iinds.shape[0]//2
 
 if oinds.shape[0]<=n_train:
-    np.save(dir_add+file_names[ii]+'_'+str(n_train)+'_'+str(nn),[np.nan,np.nan,np.nan])
+    acc,mcc,rws,df = np.nan,np.nan,np.nan,np.nan
+    drm.save(dir_add+file_names[ii]+'_'+str(n_train)+'_'+str(nn),[acc,mcc,rws,df])
     exit()
 
 np.random.shuffle(iinds)
