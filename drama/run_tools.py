@@ -16,13 +16,13 @@ def synt_event(i_sig, n_ftrs,x=None,n_inlier=2000,n_outlier=100,
 
     X = []
     y = []
-    for key,value in main_data.iteritems():
+    for key,value in main_data.items():
         for _ in range(value):
             Xp = signal(key,x,sigma,n1,n2,n3,n4)
             X.append(Xp)
             y.append(0)
 
-    for key,value in event_data.iteritems():
+    for key,value in event_data.items():
         for _ in range(value):
             Xp = signal(key,x,sigma,n1,n2,n3,n4)
             Xp = event_sig(Xp,mu=mu,amp=amp,sig=sig)
@@ -38,7 +38,7 @@ def synt_mix(i_sig, n_ftrs,x=None,n_sig=11,n_inlier=1000,n_outlier=5,sigma = 0.2
         x = np.linspace(0,1,n_ftrs)
     X = []
     y = []
-    for key,value in main_data.iteritems():
+    for key,value in main_data.items():
         for _ in range(value):
             Xp = signal(key,x,sigma,n1,n2,n3,n4)
             X.append(Xp)
@@ -61,7 +61,7 @@ def synt_unbalanced(train_data = {1:1000,2:1000,3:1000,4:1000,5:50,6:50},
 
     X = []
     y = []
-    for key,value in train_data.iteritems():
+    for key,value in train_data.items():
         for _ in range(value):
             Xp = signal(key,x,sigma,n1,n2,n3,n4)
             X.append(Xp)
@@ -71,7 +71,7 @@ def synt_unbalanced(train_data = {1:1000,2:1000,3:1000,4:1000,5:50,6:50},
 
     X = []
     y = []    
-    for key,value in test_data.iteritems():
+    for key,value in test_data.items():
         for _ in range(value):
             Xp = signal(key,x,sigma,n1,n2,n3,n4)
             X.append(Xp)
@@ -90,7 +90,7 @@ def synt_unbalanced(train_data = {1:1000,2:1000,3:1000,4:1000,5:50,6:50},
 #               'NMF':NMF(n_components=2), 
 #               'FastICA':FastICA(n_components=2, max_iter=1000)}
 
-#    for dim_r, value in dim_rs.iteritems():
+#    for dim_r, value in dim_rs.items():
 #        print '------------------- '+dim_r+' --------------------'
 
 #        splitter = mce.Splitter(X_train, value, clustering)
