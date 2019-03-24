@@ -74,8 +74,8 @@ oinds = np.argwhere(y[:,0]==1)[:,0]
 nhalf = iinds.shape[0]//2
 
 if oinds.shape[0]<=n_train:
-    acc,mcc,rws,df = np.nan,np.nan,np.nan,np.nan
-    drm.save(dir_add+file_names[ii]+'_'+str(n_train)+'_'+str(nn),[acc,mcc,rws,df])
+    auc,mcc,rws,df = np.nan,np.nan,np.nan,np.nan
+    drm.save(dir_add+file_names[ii]+'_'+str(n_train)+'_'+str(nn),[auc,mcc,rws,df])
     exit()
 
 np.random.shuffle(iinds)
@@ -129,7 +129,7 @@ o3 = res[rws_set[0]][rws_set[2]]
 auc = drm.roc_auc_score(y_test==1, o1)
 mcc = drm.MCC(y_test==1, o2)
 rws = drm.rws_score(y_test==1, o3)
-print(acc,mcc,rws)
+print(auc,mcc,rws)
 
 drm.save(dir_add+str(i_sig)+'_'+str(n_train)+'_'+str(nn),[auc,mcc,rws,df])
 
