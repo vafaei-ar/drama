@@ -40,7 +40,27 @@ X, y = drm.synt_event(i_sig,n_ftrs,
 #    ax2.plot(outliers[i],'r') 
 #plt.savefig('1.jpg')
     
-y = y[:,None]   
+y = y[:,None] 
+
+if n_train==0:
+    res = drm.unsupervised_outlier_finder_all(X_train)
+    df = drm.sk_check(X,X,y,[1])
+    auc = []
+    mcc = []
+    rws = []
+    for i in range(50):
+        for j in ['real','latent']:
+            o1 = res[j][i]
+            auc.append(drm.roc_auc_score(y_train==1, o1))
+            mcc.append(drm.MCC(y_train==1, o1))
+            rws.append(drm.rws_score(y_train==1, o1))
+    auc = np.array(auc)
+    mcc = np.array(mcc)
+    rws = np.array(rws)
+              
+    drm.save(dir_add+str(i_sig)+'_'+str(n_train)+'_'+str(nn),[acc,mcc,rws,df])
+
+  
 iinds = np.argwhere(y[:,0]==0)[:,0]
 oinds = np.argwhere(y[:,0]==1)[:,0]
 nhalf = iinds.shape[0]//2
@@ -64,10 +84,6 @@ X_test = X_test/X_test.max()
 df = drm.sk_check(X_test,X_test,y_test,[1])
 
 res = drm.unsupervised_outlier_finder_all(X_train)        
-
-auc = []
-mcc = []
-rws = []
 
 auc_b = -100
 mcc_b = -100
