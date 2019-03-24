@@ -21,12 +21,13 @@ drm.ch_mkdir(dir_add)
 
 if os.path.exists(dir_add+str(i_sig)+'_'+str(n_train)+'_'+str(nn)+'.pickle'):
     exit()
-    
-X, y = drm.synt_event(i_sig,n_ftrs,
-                      n_inlier=1000,n_outlier=50,
-                      sigma = noise,n1 = scl,
-                      n2 = sft,n3 = scl,n4 = sft)
-y = y[:,None]                      
+                      
+x = np.linspace(0,1,n_ftrs)
+X, y = drm.synt_mix(i_sig,n_ftrs,x=x,
+                    n_inlier=1000,n_outlier=5,
+                    sigma = noise,n1 = scl,n2 = sft,
+                    n3 = scl,n4 = sft)
+
 #gs = gridspec.GridSpec(1, 2)
 #plt.figure(figsize=(8,3)) 
 #ax1 = plt.subplot(gs[0, 0])
@@ -34,15 +35,20 @@ y = y[:,None]
 #ax1.set_title('Inliers')
 #ax2.set_title('Outliers')
 
-#inliers = X[y==0]
-#outliers = X[y==1]
-#for i in range(10):
+#inliers = X[y==i_sig]
+#outliers = X[y!=i_sig]
+#outliers_y = y[y!=i_sig]
+
+#for i in range(0,45,5):
 #    ax1.plot(inliers[i],'b')
-#    ax2.plot(outliers[i],'r') 
+#    ax2.plot(outliers[i],drm.COLORS[outliers_y[i]])
+#    
+#plt.subplots_adjust(hspace=0.3,left=0.1, right=0.9, top=0.9, bottom=0.1)
 #plt.savefig('1.jpg')
     
-iinds = np.argwhere(y[:,0]==0)[:,0]
-oinds = np.argwhere(y[:,0]==1)[:,0]
+y = y[:,None]   
+iinds = np.argwhere(y[:,0]==i_sig)[:,0]
+oinds = np.argwhere(y[:,0]!=i_sig)[:,0]
 nhalf = iinds.shape[0]//2
 
 if oinds.shape[0]<=n_train:
@@ -108,48 +114,6 @@ rws = drm.rws_score(y_test==1, o3)
 print(acc,mcc,rws)
 
 drm.save(dir_add+str(i_sig)+'_'+str(n_train)+'_'+str(nn),[acc,mcc,rws,df])
-
-
-    
-    
-    
-#    
-#synt_unbalanced(train_data = {1:1000,2:1000,3:1000,4:1000,5:50,6:50},
-#										test_data = {1:1000,2:1000,3:1000,4:1000,5:50,6:50,7:50,8:50,9:50,10:50},
-#										sigma = 0.1,n1 = 0.005,n2 = 0.005,n3 = 0.005,n4 = 0.005,n_ftrs = 100)
-    
-    
-    
-#i_sig = 2
-#n_ftrs = 100
-#noise = 0.3
-#scl = 0.0
-#sft = 0.0
-
-#x = np.linspace(0,1,n_ftrs)
-
-#X, y = drm.synt_mix(i_sig,n_ftrs,x=x,sigma = noise,n1 = scl,n2 = sft,n3 = scl,n4 = sft)
-
-#synt_mix(i_sig, n_ftrs,x=None,n_sig=11,n_inlier=1000,n_outlier=5,sigma = 0.2,n1 = 0.02,n2 = 0.01,n3 = 0.02,n4 = 0.01)
-
-#gs = gridspec.GridSpec(1, 2)
-#plt.figure(figsize=(8,3)) 
-#ax1 = plt.subplot(gs[0, 0])
-#ax2 = plt.subplot(gs[0, 1])
-#ax1.set_title('Inliers')
-#ax2.set_title('Outliers')
-
-#inliers = X[y==i_sig]
-#outliers = X[y!=i_sig]
-#outliers_y = y[y!=i_sig]
-
-#for i in range(0,45,5):
-#    ax1.plot(inliers[i],'b')
-#    ax2.plot(outliers[i],drm.COLORS[outliers_y[i]])
-#    
-#plt.subplots_adjust(hspace=0.3,left=0.1, right=0.9, top=0.9, bottom=0.1)
-
-#plt.savefig('2.jpg')
 
 
 
