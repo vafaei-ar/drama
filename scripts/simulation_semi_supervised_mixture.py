@@ -46,11 +46,11 @@ X, y = drm.synt_mix(i_sig,n_ftrs,x=x,
 #plt.subplots_adjust(hspace=0.3,left=0.1, right=0.9, top=0.9, bottom=0.1)
 #plt.savefig('1.jpg')
     
+y = (y!=i_sig).astype(int)
 y = y[:,None]   
-y[:,0] = (y[:,0]!=i_sig).astypr(int)
 
 if n_train==0:
-    res = drm.unsupervised_outlier_finder_all(X_train)
+    res = drm.unsupervised_outlier_finder_all(X)
     df = drm.sk_check(X,X,y,[1])
     auc = []
     mcc = []
@@ -58,14 +58,16 @@ if n_train==0:
     for i in range(50):
         for j in ['real','latent']:
             o1 = res[j][i]
-            auc.append(drm.roc_auc_score(y_train==1, o1))
-            mcc.append(drm.MCC(y_train==1, o1))
-            rws.append(drm.rws_score(y_train==1, o1))
+            auc.append(drm.roc_auc_score(y==1, o1))
+            mcc.append(drm.MCC(y==1, o1))
+            rws.append(drm.rws_score(y==1, o1))
+            
+#            print(y==1)
     auc = np.array(auc)
     mcc = np.array(mcc)
     rws = np.array(rws)
-              
-    drm.save(dir_add+str(i_sig)+'_'+str(n_train)+'_'+str(nn),[acc,mcc,rws,df])
+    drm.save(dir_add+str(i_sig)+'_'+str(n_train)+'_'+str(nn),[auc,mcc,rws,df])
+    exit() 
 
 iinds = np.argwhere(y[:,0]==0)[:,0]
 oinds = np.argwhere(y[:,0]==1)[:,0]
@@ -124,12 +126,12 @@ o2 = res[mcc_set[0]][mcc_set[2]]
 res = drm.get_outliers(X_test,rws_set[1],rws_set[2],clustering=None,z_dim=2,space=rws_set[0])
 o3 = res[rws_set[0]][rws_set[2]]
 
-acc = drm.roc_auc_score(y_test==1, o1)
+auc = drm.roc_auc_score(y_test==1, o1)
 mcc = drm.MCC(y_test==1, o2)
 rws = drm.rws_score(y_test==1, o3)
 print(acc,mcc,rws)
 
-drm.save(dir_add+str(i_sig)+'_'+str(n_train)+'_'+str(nn),[acc,mcc,rws,df])
+drm.save(dir_add+str(i_sig)+'_'+str(n_train)+'_'+str(nn),[auc,mcc,rws,df])
 
 
 
