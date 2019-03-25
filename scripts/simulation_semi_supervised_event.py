@@ -49,7 +49,7 @@ if n_train==0:
     mcc = []
     rws = []
     for i in range(50):
-        for j in ['real','latent']:
+        for j in ['real']:
             o1 = res[j][i]
             auc.append(drm.roc_auc_score(y==1, o1))
             mcc.append(drm.MCC(y==1, o1))
@@ -91,7 +91,7 @@ mcc_b = -100
 rws_b = -100
 
 for i in range(50):
-    for j in ['real','latent']:
+    for j in ['real']:
         o1 = res[j][i]
         auc = drm.roc_auc_score(y_train==1, o1)
         mcc = drm.MCC(y_train==1, o1)

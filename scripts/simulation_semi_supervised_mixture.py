@@ -9,7 +9,7 @@ import drama as drm
 #from matplotlib import gridspec
 
 n_ftrs = 100 
-noise = 0.3
+noise = 0.8
 scl = 0.00
 sft = 0.00
 
@@ -27,6 +27,10 @@ X, y = drm.synt_mix(i_sig,n_ftrs,x=x,
                     n_inlier=1000,n_outlier=5,
                     sigma = noise,n1 = scl,n2 = sft,
                     n3 = scl,n4 = sft)
+                    
+#synt_unbalanced(train_data = {1:1000,2:1000,3:1000,4:1000,5:50,6:50},
+#					test_data = {1:1000,2:1000,3:1000,4:1000,5:50,6:50,7:50,8:50,9:50,10:50},
+#					sigma = 0.1,n1 = 0.005,n2 = 0.005,n3 = 0.005,n4 = 0.005,n_ftrs = 100)
 
 #gs = gridspec.GridSpec(1, 2)
 #plt.figure(figsize=(8,3)) 
@@ -98,7 +102,7 @@ mcc_b = -100
 rws_b = -100
 
 for i in range(50):
-    for j in ['real','latent']:
+    for j in ['real']:
         o1 = res[j][i]
         auc = drm.roc_auc_score(y_train==1, o1)
         mcc = drm.MCC(y_train==1, o1)
@@ -129,8 +133,10 @@ o3 = res[rws_set[0]][rws_set[2]]
 auc = drm.roc_auc_score(y_test==1, o1)
 mcc = drm.MCC(y_test==1, o2)
 rws = drm.rws_score(y_test==1, o3)
-print(auc,mcc,rws)
 
+print(auc_set,mcc_set,rws_set)
+print(auc,mcc,rws)
+exit()
 drm.save(dir_add+str(i_sig)+'_'+str(n_train)+'_'+str(nn),[auc,mcc,rws,df])
 
 
