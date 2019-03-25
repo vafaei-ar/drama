@@ -53,7 +53,7 @@ if n_train==0:
     mcc = np.array(mcc)
     rws = np.array(rws)
               
-    drm.save(dir_add+str(i_sig)+'_'+str(n_train)+'_'+str(nn),[auc,mcc,rws,df])
+    drm.save(dir_add+file_names[ii]+'_'+str(n_train)+'_'+str(nn),[auc,mcc,rws,df])
     exit()
 
 iinds = np.argwhere(y[:,0]==0)[:,0]
