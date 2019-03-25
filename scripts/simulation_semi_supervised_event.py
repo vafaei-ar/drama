@@ -60,7 +60,6 @@ if n_train==0:
               
     drm.save(dir_add+str(i_sig)+'_'+str(n_train)+'_'+str(nn),[auc,mcc,rws,df])
     exit()
-
   
 iinds = np.argwhere(y[:,0]==0)[:,0]
 oinds = np.argwhere(y[:,0]==1)[:,0]

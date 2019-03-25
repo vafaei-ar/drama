@@ -37,13 +37,32 @@ except:
     X = np.array(data['X']).T.astype(float)
     y = np.array(data['y']).T.astype(float)
     
+if n_train==0:
+    res = drm.unsupervised_outlier_finder_all(X)
+    df = drm.sk_check(X,X,y,[1])
+    auc = []
+    mcc = []
+    rws = []
+    for i in range(50):
+        for j in ['real']:
+            o1 = res[j][i]
+            auc.append(drm.roc_auc_score(y==1, o1))
+            mcc.append(drm.MCC(y==1, o1))
+            rws.append(drm.rws_score(y==1, o1))
+    auc = np.array(auc)
+    mcc = np.array(mcc)
+    rws = np.array(rws)
+              
+    drm.save(dir_add+str(i_sig)+'_'+str(n_train)+'_'+str(nn),[auc,mcc,rws,df])
+    exit()
+
 iinds = np.argwhere(y[:,0]==0)[:,0]
 oinds = np.argwhere(y[:,0]==1)[:,0]
 nhalf = iinds.shape[0]//2
 
 if oinds.shape[0]<=n_train:
-    acc,mcc,rws,df = np.nan,np.nan,np.nan,np.nan
-    drm.save(dir_add+file_names[ii]+'_'+str(n_train)+'_'+str(nn),[acc,mcc,rws,df])
+    auc,mcc,rws,df = np.nan,np.nan,np.nan,np.nan
+    drm.save(dir_add+file_names[ii]+'_'+str(n_train)+'_'+str(nn),[auc,mcc,rws,df])
     exit()
 
 np.random.shuffle(iinds)
@@ -70,7 +89,7 @@ mcc_b = -100
 rws_b = -100
 
 for i in range(50):
-    for j in ['real','latent']:
+    for j in ['real']:
         o1 = res[j][i]
         auc = drm.roc_auc_score(y_train==1, o1)
         mcc = drm.MCC(y_train==1, o1)
@@ -98,11 +117,13 @@ o2 = res[mcc_set[0]][mcc_set[2]]
 res = drm.get_outliers(X_test,rws_set[1],rws_set[2],clustering=None,z_dim=2,space=rws_set[0])
 o3 = res[rws_set[0]][rws_set[2]]
 
-acc = drm.roc_auc_score(y_test==1, o1)
+auc = drm.roc_auc_score(y_test==1, o1)
 mcc = drm.MCC(y_test==1, o2)
 rws = drm.rws_score(y_test==1, o3)
-print(acc,mcc,rws)
 
-drm.save(dir_add+file_names[ii]+'_'+str(n_train)+'_'+str(nn),[acc,mcc,rws,df])
+print(auc_set,mcc_set,rws_set)
+print(auc,mcc,rws)
+
+drm.save(dir_add+file_names[ii]+'_'+str(n_train)+'_'+str(nn),[auc,mcc,rws,df,[auc_set,mcc_set,rws_set]])
 
 
