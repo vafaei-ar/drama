@@ -136,8 +136,8 @@ rws = drm.rws_score(y_test==1, o3)
 
 print(auc_set,mcc_set,rws_set)
 print(auc,mcc,rws)
-exit()
-drm.save(dir_add+str(i_sig)+'_'+str(n_train)+'_'+str(nn),[auc,mcc,rws,df])
+
+drm.save(dir_add+str(i_sig)+'_'+str(n_train)+'_'+str(nn),[auc,mcc,rws,df,[auc_set,mcc_set,rws_set]])
 
 
 

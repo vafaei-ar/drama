@@ -122,9 +122,11 @@ o3 = res[rws_set[0]][rws_set[2]]
 auc = drm.roc_auc_score(y_test==1, o1)
 mcc = drm.MCC(y_test==1, o2)
 rws = drm.rws_score(y_test==1, o3)
+
+print(auc_set,mcc_set,rws_set)
 print(auc,mcc,rws)
 
-drm.save(dir_add+str(i_sig)+'_'+str(n_train)+'_'+str(nn),[auc,mcc,rws,df])
+drm.save(dir_add+str(i_sig)+'_'+str(n_train)+'_'+str(nn),[auc,mcc,rws,df,[auc_set,mcc_set,rws_set]])
 
 
     
