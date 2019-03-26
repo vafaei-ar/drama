@@ -81,6 +81,19 @@ def synt_unbalanced(train_data = {1:1000,2:1000,3:1000,4:1000,5:50,6:50},
     
     return X_train,y_train,X_test,y_test 
 
+def simulate_shapes(numbers = {1:10,2:10,3:10,4:10,5:10,6:10,7:10,8:10,9:10,10:10},
+					sigma = 0.1,n1 = 0.005,n2 = 0.005,n3 = 0.005,n4 = 0.005,n_ftrs = 100):
+    x = np.linspace(0,1,n_ftrs)
+    X = []
+    y = []
+    for key,value in train_data.items():
+        for _ in range(value):
+            Xp = signal(key,x,sigma,n1,n2,n3,n4)
+            X.append(Xp)
+            y.append(key)
+    X = np.array(X)
+    y = np.array(y)
+    return X,y 
 #def job(X_train,X,name,n_t):
 #    out = {}
 #    n_ftrs = X.shape[1]
