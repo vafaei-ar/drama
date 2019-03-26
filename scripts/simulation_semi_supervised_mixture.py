@@ -22,15 +22,21 @@ drm.ch_mkdir(dir_add)
 if os.path.exists(dir_add+str(i_sig)+'_'+str(n_train)+'_'+str(nn)+'.pickle'):
     exit()
     
-x = np.linspace(0,1,n_ftrs)
-X, y = drm.synt_mix(i_sig,n_ftrs,x=x,
-                    n_inlier=1000,n_outlier=5,
-                    sigma = noise,n1 = scl,n2 = sft,
-                    n3 = scl,n4 = sft)
-                    
-X_train,y_train,X_test,y_test = synt_unbalanced(train_data = {1:1000,2:1000,3:1000,4:1000,5:50,6:50},
-					test_data = {1:1000,2:1000,3:1000,4:1000,5:50,6:50,7:50,8:50,9:50,10:50},
-					sigma = 0.1,n1 = 0.005,n2 = 0.005,n3 = 0.005,n4 = 0.005,n_ftrs = 100)
+#x = np.linspace(0,1,n_ftrs)
+#X, y = drm.synt_mix(i_sig,n_ftrs,x=x,
+#                    n_inlier=1000,n_outlier=5,
+#                    sigma = noise,n1 = scl,n2 = sft,
+#                    n3 = scl,n4 = sft)
+
+ns = np.zeros(10)+5
+ns[i_sig-1] = 1000
+
+for i in range(10):
+    numbers = {i+1:ns[i]}
+
+X,y = drm.simulate_shapes(numbers = numbers,
+					        sigma = 0.1,n1 = 0.005,n2 = 0.005,
+					        n3 = 0.005,n4 = 0.005,n_ftrs = 100)
 					
 					
 exit()

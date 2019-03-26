@@ -86,7 +86,7 @@ def simulate_shapes(numbers = {1:10,2:10,3:10,4:10,5:10,6:10,7:10,8:10,9:10,10:1
     x = np.linspace(0,1,n_ftrs)
     X = []
     y = []
-    for key,value in train_data.items():
+    for key,value in numbers.items():
         for _ in range(value):
             Xp = signal(key,x,sigma,n1,n2,n3,n4)
             X.append(Xp)
