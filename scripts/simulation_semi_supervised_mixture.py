@@ -30,16 +30,14 @@ if os.path.exists(dir_add+str(i_sig)+'_'+str(n_train)+'_'+str(nn)+'.pickle'):
 
 ns = np.zeros(10)+5
 ns[i_sig-1] = 1000
-
+numbers = {}
 for i in range(10):
-    numbers = {i+1:ns[i]}
+    numbers[i+1] = ns[i]
 
 X,y = drm.simulate_shapes(numbers = numbers,
 					        sigma = 0.1,n1 = 0.005,n2 = 0.005,
 					        n3 = 0.005,n4 = 0.005,n_ftrs = 100)
-					
-					
-exit()
+
 #gs = gridspec.GridSpec(1, 2)
 #plt.figure(figsize=(8,3)) 
 #ax1 = plt.subplot(gs[0, 0])
