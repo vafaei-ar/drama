@@ -36,9 +36,10 @@ numbers = {}
 for i in range(10):
     numbers[i+1] = ns[i]
 
-X,y = drm.simulate_shapes(numbers = numbers,
-					        sigma = 0.1,n1 = 0.005,n2 = 0.005,
-					        n3 = 0.005,n4 = 0.005,n_ftrs = 100)
+X,y = drm.simulate_shapes(numbers=numbers,n_ftrs = 100,
+                            sigma=noise,
+                            n1 = scl,n2 = sft,
+					        n3 = scl,n4 = sft)
 
 #gs = gridspec.GridSpec(1, 2)
 #plt.figure(figsize=(8,3)) 
