@@ -30,16 +30,37 @@ if os.path.exists(dir_add+str(i_sig)+'_'+str(n_train)+'_'+str(nn)+'.pickle'):
 #                    sigma = noise,n1 = scl,n2 = sft,
 #                    n3 = scl,n4 = sft)
 
-ns = np.zeros(10)+5
-ns[i_sig-1] = 1000
+if scn==1:
+    ns = np.zeros(10)+5
+    ns[i_sig-1] = 1000
+elif scn==2:
+    inds = np.arange(10)
+    np.random.shuffle(inds)
+    ns = np.zeros(10)+5
+    for i in inds[:5]:
+        ns[i] = 500
+elif scn==3:    
+    ns = np.zeros(10)+500
+    ns[i_sig-1] = 50  
+else:
+    print('the scenario is not recognized!')
+    exit()
+    
 numbers = {}
 for i in range(10):
     numbers[i+1] = ns[i]
 
-X,y = drm.simulate_shapes(numbers=numbers,n_ftrs = 100,
+X,y = drm.simulate_shapes(numbers=numbers,n_ftrs = n_ftrs,
                             sigma=noise,
                             n1 = scl,n2 = sft,
 					        n3 = scl,n4 = sft)
+
+if scn==1:
+    y = (y!=i_sig).astype(int)
+elif scn==2:
+    y = np.isin(y, inds[5:]+1).astype(int)
+elif scn==3:    
+    y = (y==i_sig).astype(int) 
 
 #gs = gridspec.GridSpec(1, 2)
 #plt.figure(figsize=(8,3)) 
@@ -59,7 +80,6 @@ X,y = drm.simulate_shapes(numbers=numbers,n_ftrs = 100,
 #plt.subplots_adjust(hspace=0.3,left=0.1, right=0.9, top=0.9, bottom=0.1)
 #plt.savefig('1.jpg')
     
-y = (y!=i_sig).astype(int)
 y = y[:,None]   
 
 if n_train==0:
