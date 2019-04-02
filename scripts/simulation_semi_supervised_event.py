@@ -20,7 +20,7 @@ sft = 0.00
 i_sig = int(sys.argv[1])
 n_train = int(sys.argv[2])
 nn = int(sys.argv[3])
-dir_add = './'+sys.argv[0][:-3]+'_res/'
+dir_add = './'+sys.argv[0][:-3]+'_'+str(n_ftrs)+'_res/'
 drm.ch_mkdir(dir_add)
 
 if os.path.exists(dir_add+str(i_sig)+'_'+str(n_train)+'_'+str(nn)+'.pickle'):
