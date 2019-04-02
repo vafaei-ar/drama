@@ -50,12 +50,113 @@ def MCC(outliers,v,n_o=None):
     pred[o_ind] = 1
     return matthews_corrcoef(outliers.astype(int),pred)
 
+def result_array(res,y,space):
+    n_drt = len(np.unique(res['drt']))
+    n_metr = len(np.unique(res['metric']))
+
+    arr = np.zeros((n_drt,n_metr,3))
+    drts = n_drt*['']
+    metrs = n_metr*['']
+
+    for i in range(n_drt*n_metr):
+        row = i // n_metr
+        col = i % n_metr
+        o1 = res[space][i]
+
+        auc = roc_auc_score(y==1, o1)
+        mcc = MCC(y==1, o1)
+        bru = rws_score(y==1, o1)
+
+        arr[row,col,0] = auc
+        arr[row,col,1] = mcc
+        arr[row,col,2] = bru
+        drts[row] = res['drt'][i]
+        metrs[col] = res['metric'][i]
+        
+    return arr,drts,metrs
+
+def plot_table(arr,drts,metrs,save=False,prefix=''):
+    import matplotlib.pylab as plt
+    
+    crt = ['AUC','MCC','RWS']
+    n_drt = len(drts)
+    n_metr = len(metrs)
+    for iii in range(3):
+        mtx = arr[:,:,iii]
+
+        fig = plt.figure(figsize=(2*n_metr,2*n_drt))
+        plt.clf()
+        ax = fig.add_subplot(111)
+        ax.set_aspect('auto')
+        ax.imshow(mtx, cmap=plt.cm.jet,interpolation='nearest')
+
+        width, height = mtx.shape
+
+        rnk = 50-mtx.ravel().argsort().argsort().reshape(mtx.shape)
+
+        for x in range(width):
+            for y in range(height):
+                ax.annotate('{:3.1f}\n rank: {:d}'.format(100*mtx[x][y],rnk[x][y]), xy=(y, x), 
+                            horizontalalignment='center',
+                            verticalalignment='center',fontsize=20);
+
+        plt.xticks(np.arange(n_metr),metrs,fontsize=20,rotation=20)
+        plt.yticks(np.arange(n_drt), drts,fontsize=20)
+
+        plt.title(crt[iii]+r' ($\%$)',fontsize=25)
+        if save:
+            plt.savefig(prefix+crt[iii]+'.jpg',dpi=150,bbox_inches='tight')
+
 def random_choice(data,frac,axis=0):
     n_tot = data.shape[axis]
     idx = np.arange(n_tot)
     np.random.shuffle(idx)
     n1 = int(frac*n_tot)
     return np.take(data, idx[:n1], axis=axis),np.take(data, idx[n1:], axis=axis)
+
+def data_split(X,y,n_train):
+    iinds = np.argwhere(y[:,0]==0)[:,0]
+    oinds = np.argwhere(y[:,0]==1)[:,0]
+    nhalf = iinds.shape[0]//2
+
+    if oinds.shape[0]<=n_train:
+        exit()
+
+    np.random.shuffle(iinds)
+    np.random.shuffle(oinds)
+
+    X_train = np.concatenate([X[iinds[:nhalf]],X[oinds[:n_train]]],axis=0)
+    y_train = np.concatenate([y[iinds[:nhalf]],y[oinds[:n_train]]],axis=0)
+    X_test = np.concatenate([X[iinds[:]],X[oinds[n_train:]]],axis=0)
+    y_test = np.concatenate([y[iinds[:]],y[oinds[n_train:]]],axis=0)
+
+    X_train = X_train/X_train.max()
+    X_test = X_test/X_test.max()
+    return X_train,y_train,X_test,y_test
+
+def ind2score(oi):
+    num = oi.shape[0]
+    score = np.zeros(num)
+    score[oi[::-1]] = np.linspace(0,1,num)
+    return score
+    
+def norm_ensemble(outliers,alpha=0.1):
+    assert isinstance(outliers, dict),'Input should be a dictionary contains outliers using a several metrics.'      
+    x = dic2array(outliers)
+    x = x.view((float, len(x.dtype.names)))
+    x = x-np.min(x,axis=0,keepdims=True)
+    x_max = np.max(x,axis=0,keepdims=True)
+    x = np.where(x_max!=0,x/x_max,0)
+    return np.sum(np.power(x,alpha),axis=1)
+
+def max_ensemble(outliers):
+    assert isinstance(outliers, dict),'Input should be a dictionary contains outliers using a several metrics.'      
+    x = dic2array(outliers)
+    x = x.view((float, len(x.dtype.names)))
+    x = x-np.min(x,axis=0,keepdims=True)
+    x_max = np.max(x,axis=0,keepdims=True)
+    x = np.where(x_max!=0,x/x_max,0)
+    return np.max(x,axis=1)
 
 def standard(X):
     xmin = X.min()

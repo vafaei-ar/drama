@@ -6,10 +6,14 @@ import sys
 import glob
 import h5py
 import numpy as np
-import pylab as plt
+#import pylab as plt
 import drama as drm
 import scipy.io as sio
-from matplotlib import gridspec
+#from matplotlib import gridspec
+import warnings
+warnings.filterwarnings("ignore", message='default contamination parameter 0.1 will change in version 0.22 to "auto". This will change the predict method behavior.')
+warnings.filterwarnings("ignore", message='Data with input dtype float64 was converted to bool by check_pairwise_arrays.')
+warnings.filterwarnings("ignore", message='Invalid value encountered in percentile')
 
 ii = int(sys.argv[1])
 n_train = int(sys.argv[2])
@@ -38,92 +42,17 @@ except:
     y = np.array(data['y']).T.astype(float)
     
 if n_train==0:
-    res = drm.unsupervised_outlier_finder_all(X)
-    df = drm.sk_check(X,X,y,[1])
-    auc = []
-    mcc = []
-    rws = []
-    for i in range(50):
-        for j in ['real']:
-            o1 = res[j][i]
-            auc.append(drm.roc_auc_score(y==1, o1))
-            mcc.append(drm.MCC(y==1, o1))
-            rws.append(drm.rws_score(y==1, o1))
-    auc = np.array(auc)
-    mcc = np.array(mcc)
-    rws = np.array(rws)
-              
-    drm.save(dir_add+file_names[ii]+'_'+str(n_train)+'_'+str(nn),[auc,mcc,rws,df])
-    exit()
+    dd = drm.grid_run_drama(X_seen=X,y_seen=y)
+    ll = drm.grid_run_lof(X_seen=X,y_seen=y)
+    ii = drm.grid_run_iforest(X_seen=X,y_seen=y)
+    
+else:
+    X_train,y_train,X_test,y_test = drm.data_split(X,y,n_train)
+    dd = drm.grid_run_drama(X_seen=X_train ,y_seen=y_train ,X_unseen=X_test, y_unseen=y_test, n_split=1)
+    ll = drm.grid_run_lof(X_seen=X_train ,y_seen=y_train ,X_unseen=X_test, y_unseen=y_test)
+    ii = drm.grid_run_iforest(X_seen=X_train ,y_seen=y_train ,X_unseen=X_test, y_unseen=y_test)
 
-iinds = np.argwhere(y[:,0]==0)[:,0]
-oinds = np.argwhere(y[:,0]==1)[:,0]
-nhalf = iinds.shape[0]//2
+drm.save(dir_add+file_names[ii]+'_'+str(n_train)+'_'+str(nn),[dd,ll,ii])
 
-if oinds.shape[0]<=n_train:
-    auc,mcc,rws,df = np.nan,np.nan,np.nan,np.nan
-    drm.save(dir_add+file_names[ii]+'_'+str(n_train)+'_'+str(nn),[auc,mcc,rws,df])
-    exit()
-
-np.random.shuffle(iinds)
-np.random.shuffle(oinds)
-
-X_train = np.concatenate([X[iinds[:nhalf]],X[oinds[:n_train]]],axis=0)
-y_train = np.concatenate([y[iinds[:nhalf]],y[oinds[:n_train]]],axis=0)
-X_test = np.concatenate([X[iinds[:]],X[oinds[n_train:]]],axis=0)
-y_test = np.concatenate([y[iinds[:]],y[oinds[n_train:]]],axis=0)
-
-X_train = X_train/X_train.max()
-X_test = X_test/X_test.max()
-
-df = drm.sk_check(X_test,X_test,y_test,[1])
-
-res = drm.unsupervised_outlier_finder_all(X_train)        
-
-auc = []
-mcc = []
-rws = []
-
-auc_b = -100
-mcc_b = -100
-rws_b = -100
-
-for i in range(50):
-    for j in ['real']:
-        o1 = res[j][i]
-        auc = drm.roc_auc_score(y_train==1, o1)
-        mcc = drm.MCC(y_train==1, o1)
-        rws = drm.rws_score(y_train==1, o1)
-
-        if auc_b<auc:
-            auc_b = auc
-            auc_set = [j,res['drt'][i],res['metric'][i]]
-
-        if mcc_b<mcc:
-            mcc_b = mcc
-            mcc_set = [j,res['drt'][i],res['metric'][i]]
-
-        if rws_b<rws:
-            rws_b = rws
-            rws_set = [j,res['drt'][i],res['metric'][i]]
-
-
-res = drm.get_outliers(X_test,auc_set[1],auc_set[2],clustering=None,z_dim=2,space=auc_set[0])
-o1 = res[auc_set[0]][auc_set[2]]
-
-res = drm.get_outliers(X_test,mcc_set[1],mcc_set[2],clustering=None,z_dim=2,space=mcc_set[0])
-o2 = res[mcc_set[0]][mcc_set[2]]
-
-res = drm.get_outliers(X_test,rws_set[1],rws_set[2],clustering=None,z_dim=2,space=rws_set[0])
-o3 = res[rws_set[0]][rws_set[2]]
-
-auc = drm.roc_auc_score(y_test==1, o1)
-mcc = drm.MCC(y_test==1, o2)
-rws = drm.rws_score(y_test==1, o3)
-
-print(auc_set,mcc_set,rws_set)
-print(auc,mcc,rws)
-
-drm.save(dir_add+file_names[ii]+'_'+str(n_train)+'_'+str(nn),[auc,mcc,rws,df,[auc_set,mcc_set,rws_set]])
 
 

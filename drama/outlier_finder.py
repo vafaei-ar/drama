@@ -12,8 +12,9 @@ from scipy.stats import pearsonr
 from sklearn.metrics import roc_auc_score
 
 from pandas import DataFrame
-from sklearn import neighbors 
+from sklearn.neighbors import LocalOutlierFactor
 from sklearn.ensemble import IsolationForest
+from sklearn.neighbors import VALID_METRICS
 
 DEBUG = True
 all_metrics = ['cityblock','L2','L4','braycurtis',
@@ -59,12 +60,121 @@ def sk_check(X_train,X_test,y_test,o_list):
     df['RWS'][1] = rws_score(T_o, outliers)
 
     return df
+    
+def d_lof(X_seen,X_unseen=None,n_neighbors=20,algorithm='auto',metric='minkowski'):
+    lof = LocalOutlierFactor(n_neighbors = n_neighbors,
+                             algorithm = algorithm,
+                             metric = metric,
+                             novelty=not (X_unseen is None))
+    lof.fit(X_seen)
+    if X_unseen is None:
+        return -lof.negative_outlier_factor_
+    else:
+        return -score_samples(X_unseen)
 
-def ind2score(oi):
-    num = oi.shape[0]
-    score = np.zeros(num)
-    score[oi[::-1]] = np.linspace(0,1,num)
-    return score
+def grid_run_lof(X_seen,y_seen,
+                 X_unseen=None,y_unseen=None,
+                 n_neighbors = [5,20,35],
+                 algorithms = ['ball_tree', 'kd_tree', 'brute'],
+                 metrics=None):
+                 
+    semisupervised = not y_unseen is None
+    if semisupervised:
+#        print('Semi-supervised option is not available for novelty detection.')
+        X_unseen_p = None
+        assert not X_unseen is None,'X_unseen is empty!'
+    else:
+        X_unseen_p = X_unseen
+
+    aucs,mccs,rwss,conf = [],[],[],[]
+
+    for nn in n_neighbors:
+        for al in algorithms:
+            if metrics is None:
+                metrics = VALID_METRICS[al]
+            for mt in metrics:
+                try:
+                    outliers = d_lof(X_seen=X_seen,X_unseen=X_unseen_p,n_neighbors=nn,algorithm=al,metric=mt)
+                except:
+                    pass
+                conf.append([nn,al,mt])
+                aucs.append(roc_auc_score(y_seen, outliers))
+                mccs.append(MCC(y_seen, outliers))
+                rwss.append(rws_score(y_seen, outliers))
+                    
+    if semisupervised:
+        nn,al,mt = conf[np.argmax(aucs)]
+        outliers = d_lof(X_seen=X_unseen,n_neighbors=nn,algorithm=al,metric=mt)
+        auc = roc_auc_score(y_unseen, outliers)
+        
+        nn,al,mt = conf[np.argmax(mccs)]
+        outliers = d_lof(X_seen=X_unseen,n_neighbors=nn,algorithm=al,metric=mt)
+        mcc = roc_auc_score(y_unseen, outliers)
+        
+        nn,al,mt = conf[np.argmax(rwss)]
+        outliers = d_lof(X_seen=X_unseen,n_neighbors=nn,algorithm=al,metric=mt)
+        rws = roc_auc_score(y_unseen, outliers)
+        
+        return auc,mcc,rws
+    
+    else:
+        return np.array(aucs),np.array(mccs),np.array(rwss),np.array(conf)
+
+def d_iforest(X_seen,X_unseen=None,n_estimators=100,max_features=1.0,bootstrap=False):
+    isof = IsolationForest(n_estimators=n_estimators,
+                           max_features=max_features,
+                           bootstrap=bootstrap,
+                           behaviour="new")
+    isof.fit(X_seen)
+    if X_unseen is None:
+        scores_pred = isof.decision_function(X_seen)
+    else:
+        scores_pred = isof.decision_function(X_unseen)
+    return scores_pred.max()-scores_pred
+
+def grid_run_iforest(X_seen,y_seen,
+                     X_unseen=None,y_unseen=None,
+                     n_estimators= [50,100,150],
+                     max_features= [0.2,0.5,1.0],
+                     bootstrap=[False,True]):
+                 
+    semisupervised = not y_unseen is None
+    if semisupervised:
+#        print('Semi-supervised option is not available for novelty detection.')
+        X_unseen_p = None
+        assert not X_unseen is None,'X_unseen is empty!'
+    else:
+        X_unseen_p = X_unseen
+
+    aucs,mccs,rwss,conf = [],[],[],[]
+
+    for ns in n_estimators:
+        for mf in max_features:
+            for bs in bootstrap:
+                conf.append([ns,mf,bs])
+                outliers = d_iforest(X_seen,X_unseen_p,n_estimators=ns,max_features=mf,bootstrap=bs)
+                aucs.append(roc_auc_score(y_seen, outliers))
+                mccs.append(MCC(y_seen, outliers))
+                rwss.append(rws_score(y_seen, outliers))
+                
+    if semisupervised:
+        ns,mf,bs = conf[np.argmax(aucs)]
+        outliers = d_iforest(X_unseen,n_estimators=ns,max_features=mf,bootstrap=bs)
+        auc = roc_auc_score(y_unseen, outliers)
+        
+        ns,mf,bs = conf[np.argmax(mccs)]
+        outliers = d_iforest(X_unseen,n_estimators=ns,max_features=mf,bootstrap=bs)
+        mcc = roc_auc_score(y_unseen, outliers)
+        
+        ns,mf,bs = conf[np.argmax(rwss)]
+        outliers = d_iforest(X_unseen,n_estimators=ns,max_features=mf,bootstrap=bs)
+        rws = roc_auc_score(y_unseen, outliers)
+        
+        return auc,mcc,rws
+    
+    else:
+        return np.array(aucs),np.array(mccs),np.array(rwss),np.array(conf)
+
 
 def outliers_real(X,splitter,metrics):
 
@@ -121,26 +231,6 @@ def outliers_real(X,splitter,metrics):
                 return distance_test
 
     return distance
-
-def norm_ensemble(outliers,alpha=0.1):
-
-    assert isinstance(outliers, dict),'Input should be a dictionary contains outliers using a several metrics.'      
-    x = dic2array(outliers)
-    x = x.view((float, len(x.dtype.names)))
-    x = x-np.min(x,axis=0,keepdims=True)
-    x_max = np.max(x,axis=0,keepdims=True)
-    x = np.where(x_max!=0,x/x_max,0)
-    return np.sum(np.power(x,alpha),axis=1)
-
-def max_ensemble(outliers):
-
-    assert isinstance(outliers, dict),'Input should be a dictionary contains outliers using a several metrics.'      
-    x = dic2array(outliers)
-    x = x.view((float, len(x.dtype.names)))
-    x = x-np.min(x,axis=0,keepdims=True)
-    x_max = np.max(x,axis=0,keepdims=True)
-    x = np.where(x_max!=0,x/x_max,0)
-    return np.max(x,axis=1)
 
 def outliers_latent(splitter,metrics):
 
@@ -211,236 +301,150 @@ def outliers_latent(splitter,metrics):
                 return distance_test
 
     return distance
-    
-def get_outliers(X,drt_name,metrics,clustering=None,z_dim=2,space='both'):
 
-    dim_rs ={'AE':'AE','VAE':'VAE','PCA':PCA(n_components=z_dim),'NMF':NMF(n_components=z_dim), 
-             'FastICA':FastICA(n_components=z_dim, max_iter=1000)}
-             
-    if drt_name not in dim_rs.keys():   		
-        print('Selected dimensionality reduction name is not recognized \n'+\
-              'Please choose one from:',dim_rs.keys())
-        return
+class D_Drama(object):
+
+    def __init__(self,X_seen,
+                 drt_name='FastICA',
+                 clustering=None,
+                 z_dim=2):
+                 
+        dim_rs ={'AE':'AE','VAE':'VAE','PCA':PCA(n_components=z_dim),'NMF':NMF(n_components=z_dim), 
+                 'FastICA':FastICA(n_components=z_dim, max_iter=1000)}
+
+        if drt_name not in dim_rs.keys():   		
+            print('Selected dimensionality reduction name is not recognized \n'+\
+                  'Please choose one from:',dim_rs.keys())
+            return
+                    
+        if clustering is None:
+            agg = AgglomerativeClustering()
+            clustering = agg.fit_predict
+            
+        self.splitter = Splitter(X_seen, reducer = dim_rs[drt_name], clustering = clustering, z_dim=z_dim)
+        self.X_seen = X_seen
         
-    outliers = {'real':None,'latent':None}
-
-    if clustering is None:
-        agg = AgglomerativeClustering()
-        clustering = agg.fit_predict
+    def __call__(self,X_unseen=None,
+                 metrics=all_metrics,
+                 n_split=1,space='real'):  
+                            
+        if X_unseen is None:
+            X_unseen = self.X_seen
+            if n_split>1:
+                print('Warning! too large n_split in anomaly detection may decrease performance.')
         
-    splitter = Splitter(X, reducer = dim_rs[drt_name], clustering = clustering, z_dim=z_dim)
+        outliers = {'real':None,'latent':None}
 
-    # Splitting
-    splitter.split(1,verbose=0,training_epochs=20)
+        # Splitting
+        self.splitter.split(n_split,verbose=0,training_epochs=20)
 
-    # outlier extraction for all of requeste metrics
-    if space=='real':
-        outliers['real'] = outliers_real(X,splitter,metrics)
-    elif space=='latent':
-        outliers['latent'] = outliers_latent(splitter,metrics)
+        # outlier extraction for all of requeste metrics
+        if space=='real':
+            outliers['real'] = outliers_real(X_unseen,self.splitter,metrics)
+        elif space=='latent':
+            assert 0,'Latent space is under construction!'
+    #        outliers['latent'] = outliers_latent(splitter,metrics)
+        else:
+            assert 0,'Space is not recognized!'
+    #        outliers['real'] = outliers_real(X_unseen,splitter,metrics)
+    #        outliers['latent'] = outliers_latent(splitter,metrics)
+            
+        return outliers
+
+def grid_run_drama(X_seen,y_seen,
+                   X_unseen=None,y_unseen=None,
+                   drt_list = ['AE','VAE','PCA','NMF','FastICA'],
+                   metrics = all_metrics,
+                   n_split = 1):
+                   
+    semisupervised = not y_unseen is None                 
+    if semisupervised:
+#        print('Semi-supervised option is not available for novelty detection.')
+        X_unseen_p = None
+        assert not X_unseen is None,'X_unseen is empty!'
     else:
-        outliers['real'] = outliers_real(X,splitter,metrics)
-        outliers['latent'] = outliers_latent(splitter,metrics)
+        X_unseen_p = X_unseen
+
+    aucs,mccs,rwss,conf = [],[],[],[]
+
+    X_seen = X_seen/X_seen.max()
+    if not X_unseen is None:
+        X_unseen = X_unseen/X_unseen.max()
         
-    return outliers
-    
-def get_novelties(X_train,X,drt_name,metrics,clustering=None,n_slpit=2,z_dim=2,space='both'):
-
-    dim_rs ={'AE':'AE','VAE':'VAE','PCA':PCA(n_components=z_dim),'NMF':NMF(n_components=z_dim), 
-             'FastICA':FastICA(n_components=z_dim, max_iter=1000)}
-             
-    if drt_name not in dim_rs.keys():   		
-        print('Selected dimensionality reduction name is not recognized \n'+\
-              'Please chose one from:',dim_rs.keys())
-        return
-        
-    outliers = {'real':None,'latent':None}
-
-    if clustering is None:
-        agg = AgglomerativeClustering()
-        clustering = agg.fit_predict
-        
-    splitter = Splitter(X_train, reducer = dim_rs[drt_name], clustering = clustering, z_dim=z_dim)
-
-    # Splitting
-    splitter.split(n_slpit,verbose=0,training_epochs=20)
-
-    # outlier extraction for all of requeste metrics
-    if space=='real':
-        outliers['real'] = outliers_real(X,splitter,metrics)
-    elif space=='latent':
-        outliers['latent'] = outliers_latent(splitter,metrics)
-    else:
-        outliers['real'] = outliers_real(X,splitter,metrics)
-        outliers['latent'] = outliers_latent(splitter,metrics)
-        
-    return outliers
-
-def unsupervised_outlier_finder_all(X):
-
-    X = X/X.max()
-
-    res = {'drt':[],'metric':[],'pr':[],'real':[],'latent':[]}
-    
-    drt_list = ['AE','VAE','PCA','NMF','FastICA']
-
-    num = X.shape[0]
-    n_out = num//20
-
     for drt in drt_list:
-
-        outliers_rep = get_outliers(X,drt,all_metrics)
-
-        for metr in all_metrics:
-            o1 = outliers_rep['real'][metr]
-            o2 = outliers_rep['latent'][metr]
-
-#            pr1 = pearsonr(o1[-n_out:],o2[-n_out:])[0]
-            pr = pearsonr(np.argsort(o1)[-n_out:],np.argsort(o2)[-n_out:])[0]
-
-            res['drt'].append(drt)
-            res['metric'].append(metr)
-            res['pr'].append(pr)
-            res['real'].append(o1)
-            res['latent'].append(o2)
-            
-    for i in ['pr','real','latent']:        
-        res[i] = np.array(res[i])
-
-    return res
-    
-def result_array(res,y,space):
-    n_drt = len(np.unique(res['drt']))
-    n_metr = len(np.unique(res['metric']))
-
-    arr = np.zeros((n_drt,n_metr,3))
-    drts = n_drt*['']
-    metrs = n_metr*['']
-
-    for i in range(n_drt*n_metr):
-        row = i // n_metr
-        col = i % n_metr
-        o1 = res[space][i]
-
-        auc = roc_auc_score(y==1, o1)
-        mcc = MCC(y==1, o1)
-        bru = rws_score(y==1, o1)
-
-        arr[row,col,0] = auc
-        arr[row,col,1] = mcc
-        arr[row,col,2] = bru
-        drts[row] = res['drt'][i]
-        metrs[col] = res['metric'][i]
-        
-    return arr,drts,metrs
-
-def supervised_outlier_finder_all(X_train,y_train,X_test):    
-    X_train = X_train/X_train.max()
-    X_test = X_test/X_test.max()
-    
-    res = unsupervised_outlier_finder_all(X_train)        
-        
-    auc = []
-    mcc = []
-    rws = []
-    
-    auc_b = -100
-    mcc_b = -100
-    rws_b = -100
-    
-    for i in range(50):
-        for j in ['real','latent']:
-            o1 = res[j][i]
-            auc = roc_auc_score(y_train==1, o1)
-            mcc = MCC(y_train==1, o1)
-            rws = rws_score(y_train==1, o1)
-            
-            if auc_b<auc:
-                auc_b = auc
-                auc_set = [j,res['drt'][i],res['metric'][i]]
-
-            if mcc_b<mcc:
-                mcc_b = mcc
-                mcc_set = [j,res['drt'][i],res['metric'][i]]
-
-            if rws_b<rws:
-                rws_b = rws
-                rws_set = [j,res['drt'][i],res['metric'][i]]
+        d_drama = D_Drama(X_seen = X_seen,drt_name = drt)
+        for nsp in range(n_split):
+            outliers_rep = d_drama(X_unseen=X_unseen_p, n_split = 1)
+            for metr in metrics:
+                o1 = outliers_rep['real'][metr]
+    #            o2 = outliers_rep['latent'][metr]
                 
-    
-    res = get_outliers(X_test,auc_set[1],auc_set[2],clustering=None,z_dim=2,space=auc_set[0])
-    o1 = res[auc_set[0]][auc_set[2]]
-
-    res = get_outliers(X_test,mcc_set[1],mcc_set[2],clustering=None,z_dim=2,space=mcc_set[0])
-    o2 = res[mcc_set[0]][mcc_set[2]]
-    
-    res = get_outliers(X_test,rws_set[1],rws_set[2],clustering=None,z_dim=2,space=rws_set[0])
-    o3 = res[rws_set[0]][rws_set[2]]
-    
-    return o1,o2,o3
-
-def novelty_finder_all(X_train,X,n_slpit=2):
-
-    X_train = X_train/X_train.max()
-    X = X/X.max()
-
-    res = {'drt':[],'metric':[],'pr':[],'real':[],'latent':[]}
-    
-    drt_list = ['AE','VAE','PCA','NMF','FastICA']
-
-    num = X.shape[0]
-    n_out = num//20
-
-    for drt in drt_list:
-
-        outliers_rep = get_novelties(X_train,X,drt,all_metrics,n_slpit=n_slpit)
-
-        for metr in all_metrics:
-            o1 = outliers_rep['real'][metr]
-            o2 = outliers_rep['latent'][metr]
-
-#            pr1 = pearsonr(o1[-n_out:],o2[-n_out:])[0]
-            pr = pearsonr(np.argsort(o1)[-n_out:],np.argsort(o2)[-n_out:])[0]
-
-            res['drt'].append(drt)
-            res['metric'].append(metr)
-            res['pr'].append(pr)
-            res['real'].append(o1)
-            res['latent'].append(o2)
+                auc = roc_auc_score(y_seen==1, o1)
+                mcc = MCC(y_seen==1, o1)
+                rws = rws_score(y_seen==1, o1)
+                
+                aucs.append(auc)
+                mccs.append(mcc)
+                rwss.append(rws)
+                conf.append(['real',drt,metr,nsp+1])
             
-    for i in ['pr','real','latent']:        
-        res[i] = np.array(res[i])
-
-    return res
-
-def plot_table(arr,drts,metrs,save=False,prefix=''):
-    import matplotlib.pylab as plt
+    if semisupervised:
+        space,drt,metric,nsp = conf[np.argmax(aucs)]
+        d_drama = D_Drama(X_seen = X_unseen, drt_name = drt)
+        res = d_drama(metrics=metric,n_split=nsp)
+        outliers = res[space][metric]    
+        auc = roc_auc_score(y_unseen, outliers)
+        
+        space,drt,metric,nsp = conf[np.argmax(mccs)]
+        d_drama = D_Drama(X_seen = X_unseen, drt_name = drt)
+        res = d_drama(metrics=metric,n_split=nsp)
+        outliers = res[space][metric]  
+        mcc = roc_auc_score(y_unseen, outliers)
+        
+        space,drt,metric,nsp = conf[np.argmax(rwss)]
+        d_drama = D_Drama(X_seen = X_unseen, drt_name = drt)
+        res = d_drama(metrics=metric,n_split=nsp)
+        outliers = res[space][metric]  
+        rws = roc_auc_score(y_unseen, outliers)
+        
+        return auc,mcc,rws
     
-    crt = ['AUC','MCC','RWS']
-    n_drt = len(drts)
-    n_metr = len(metrs)
-    for iii in range(3):
-        mtx = arr[:,:,iii]
+    else:
+        return np.array(aucs),np.array(mccs),np.array(rwss),np.array(conf)
+    
 
-        fig = plt.figure(figsize=(2*n_metr,2*n_drt))
-        plt.clf()
-        ax = fig.add_subplot(111)
-        ax.set_aspect('auto')
-        ax.imshow(mtx, cmap=plt.cm.jet,interpolation='nearest')
+#def grid_run_novelty_drama(X_train,X,n_split=2):
 
-        width, height = mtx.shape
+#    X_train = X_train/X_train.max()
+#    X = X/X.max()
 
-        rnk = 50-mtx.ravel().argsort().argsort().reshape(mtx.shape)
+#    res = {'drt':[],'metric':[],'pr':[],'real':[],'latent':[]}
+#    
+#    drt_list = ['AE','VAE','PCA','NMF','FastICA']
 
-        for x in range(width):
-            for y in range(height):
-                ax.annotate('{:3.1f}\n rank: {:d}'.format(100*mtx[x][y],rnk[x][y]), xy=(y, x), 
-                            horizontalalignment='center',
-                            verticalalignment='center',fontsize=20);
+#    num = X.shape[0]
+#    n_out = num//20
 
-        plt.xticks(np.arange(n_metr),metrs,fontsize=20,rotation=20)
-        plt.yticks(np.arange(n_drt), drts,fontsize=20)
+#    for drt in drt_list:
 
-        plt.title(crt[iii]+r' ($\%$)',fontsize=25)
-        if save:
-            plt.savefig(prefix+crt[iii]+'.jpg',dpi=150,bbox_inches='tight')
+#        outliers_rep = get_novelties(X_train,X,drt,all_metrics,n_split=n_split)
+
+#        for metr in all_metrics:
+#            o1 = outliers_rep['real'][metr]
+#            o2 = outliers_rep['latent'][metr]
+
+##            pr1 = pearsonr(o1[-n_out:],o2[-n_out:])[0]
+#            pr = pearsonr(np.argsort(o1)[-n_out:],np.argsort(o2)[-n_out:])[0]
+
+#            res['drt'].append(drt)
+#            res['metric'].append(metr)
+#            res['pr'].append(pr)
+#            res['real'].append(o1)
+#            res['latent'].append(o2)
+#            
+#    for i in ['pr','real','latent']:        
+#        res[i] = np.array(res[i])
+
+#    return res
+
+
