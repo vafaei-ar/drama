@@ -3,6 +3,7 @@ mpl.use('agg')
 
 import os
 import sys
+import argparse
 import numpy as np
 import drama as drm
 #import matplotlib.pylab as plt
@@ -12,7 +13,21 @@ warnings.filterwarnings("ignore", message='default contamination parameter 0.1 w
 warnings.filterwarnings("ignore", message='Data with input dtype float64 was converted to bool by check_pairwise_arrays.')
 warnings.filterwarnings("ignore", message='Invalid value encountered in percentile')
 
-n_ftrs = 100 
+parser = argparse.ArgumentParser(description='Short sample app')
+parser.add_argument('--isig', action="store", type=int, required=True)
+parser.add_argument('--ntrain', action="store", type=int, required=True)
+parser.add_argument('--nn', action="store", type=int, required=True)
+parser.add_argument('--nftrs', action="store", type=int, default=100)
+
+args = parser.parse_args()
+i_sig = args.isig
+n_train = args.ntrain
+nn = args.nn
+n_ftrs = args.nftrs
+
+dir_add = './'+sys.argv[0][:-3]+'_'+str(n_ftrs)+'_res/'
+drm.ch_mkdir(dir_add)
+
 noise = 0.8
 scl = 0.00
 sft = 0.00
