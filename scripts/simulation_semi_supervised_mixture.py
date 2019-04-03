@@ -17,12 +17,14 @@ parser = argparse.ArgumentParser(description='Short sample app')
 parser.add_argument('--isig', action="store", type=int, required=True)
 parser.add_argument('--ntrain', action="store", type=int, required=True)
 parser.add_argument('--nn', action="store", type=int, required=True)
+parser.add_argument('--scn', action="store", type=int, default=1)
 parser.add_argument('--nftrs', action="store", type=int, default=100)
 
 args = parser.parse_args()
 i_sig = args.isig
 n_train = args.ntrain
 nn = args.nn
+scn = args.scn
 n_ftrs = args.nftrs
 
 dir_add = './'+sys.argv[0][:-3]+'_'+str(n_ftrs)+'_res/'
@@ -31,11 +33,6 @@ drm.ch_mkdir(dir_add)
 noise = 0.8
 scl = 0.00
 sft = 0.00
-
-i_sig = int(sys.argv[1])
-n_train = int(sys.argv[2])
-nn = int(sys.argv[3])
-scn = int(sys.argv[4])
 
 dir_add = './'+sys.argv[0][:-3]+'_'+str(scn)+'_'+str(n_ftrs)+'_res/'
 drm.ch_mkdir(dir_add)
