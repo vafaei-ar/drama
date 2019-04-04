@@ -22,7 +22,7 @@ parser.add_argument('--ntrain', action="store", type=int, required=True)
 parser.add_argument('--nn', action="store", type=int, required=True)
 
 args = parser.parse_args()
-ii = args.id
+idd = args.id
 n_train = args.ntrain
 nn = args.nn
 
@@ -33,18 +33,18 @@ fils = sorted(glob.glob('../data/*.mat'), key=os.path.getsize)
 n_files = len(fils)
 file_names = [i.split('/')[-1][:-4] for i in fils]
 
-if os.path.exists(dir_add+file_names[ii]+'_'+str(n_train)+'_'+str(nn)+'.pickle'):
+if os.path.exists(dir_add+file_names[idd]+'_'+str(n_train)+'_'+str(nn)+'.pickle'):
     exit()
     
-print(file_names[ii])
+print(file_names[idd])
 
 try:
-    data = sio.loadmat(fils[ii])
+    data = sio.loadmat(fils[idd])
     X = data['X'].astype(float)
     y = data['y'].astype(float)
 
 except:
-    data = h5py.File(fils[ii])
+    data = h5py.File(fils[idd])
     X = np.array(data['X']).T.astype(float)
     y = np.array(data['y']).T.astype(float)
     
@@ -59,7 +59,7 @@ else:
     ll = drm.grid_run_lof(X_seen=X_train ,y_seen=y_train ,X_unseen=X_test, y_unseen=y_test)
     ii = drm.grid_run_iforest(X_seen=X_train ,y_seen=y_train ,X_unseen=X_test, y_unseen=y_test)
 
-drm.save(dir_add+file_names[ii]+'_'+str(n_train)+'_'+str(nn),[dd,ll,ii])
+drm.save(dir_add+file_names[idd]+'_'+str(n_train)+'_'+str(nn),[dd,ll,ii])
 
 
 
