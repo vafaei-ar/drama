@@ -17,12 +17,12 @@ warnings.filterwarnings("ignore", message='Data with input dtype float64 was con
 warnings.filterwarnings("ignore", message='Invalid value encountered in percentile')
 
 parser = argparse.ArgumentParser(description='Short sample app')
-parser.add_argument('--isig', action="store", type=int, required=True)
+parser.add_argument('--id', action="store", type=int, required=True)
 parser.add_argument('--ntrain', action="store", type=int, required=True)
 parser.add_argument('--nn', action="store", type=int, required=True)
 
 args = parser.parse_args()
-ii = args.isig
+ii = args.id
 n_train = args.ntrain
 nn = args.nn
 
