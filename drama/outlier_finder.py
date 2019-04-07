@@ -95,12 +95,13 @@ def grid_run_lof(X_seen,y_seen,
             for mt in metrics:
                 try:
                     outliers = d_lof(X_seen=X_seen,X_unseen=X_unseen_p,n_neighbors=nn,algorithm=al,metric=mt)
+                    conf.append([nn,al,mt])
+                    aucs.append(roc_auc_score(y_seen, outliers))
+                    mccs.append(MCC(y_seen, outliers))
+                    rwss.append(rws_score(y_seen, outliers))
                 except:
                     pass
-                conf.append([nn,al,mt])
-                aucs.append(roc_auc_score(y_seen, outliers))
-                mccs.append(MCC(y_seen, outliers))
-                rwss.append(rws_score(y_seen, outliers))
+
                     
     if semisupervised:
         nn,al,mt = conf[np.argmax(aucs)]
