@@ -65,7 +65,8 @@ def d_lof(X_seen,X_unseen=None,n_neighbors=20,algorithm='auto',metric='minkowski
     lof = LocalOutlierFactor(n_neighbors = n_neighbors,
                              algorithm = algorithm,
                              metric = metric,
-                             novelty=not (X_unseen is None))
+                             novelty=not (X_unseen is None),
+                             n_jobs=-1)
     lof.fit(X_seen)
     if X_unseen is None:
         return -lof.negative_outlier_factor_
@@ -125,7 +126,8 @@ def d_iforest(X_seen,X_unseen=None,n_estimators=100,max_features=1.0,bootstrap=F
     isof = IsolationForest(n_estimators=n_estimators,
                            max_features=max_features,
                            bootstrap=bootstrap,
-                           behaviour="new")
+                           behaviour="new",
+                           n_jobs=-1)
     isof.fit(X_seen)
     if X_unseen is None:
         scores_pred = isof.decision_function(X_seen)
