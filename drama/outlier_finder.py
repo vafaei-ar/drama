@@ -71,22 +71,40 @@ def d_lof(X_seen,X_unseen=None,n_neighbors=20,algorithm='auto',metric='minkowski
     if X_unseen is None:
         return -lof.negative_outlier_factor_
     else:
-        return -score_samples(X_unseen)
+        return -lof.score_samples(X_unseen)
 
-def grid_run_lof(X_seen,y_seen,
+def grid_run_lof(X_seen,y_seen=None,
                  X_unseen=None,y_unseen=None,
                  n_neighbors = [5,20,35],
                  algorithms = ['ball_tree', 'kd_tree', 'brute'],
                  metrics=None):
-                 
-    semisupervised = not y_unseen is None
-    if semisupervised:
+    '''         
+    This function is able to deal with three modes:
+    1- Unsupervised outlier detection 
+    2- Semi-supervised outlier detection
+    3- Novelty detection  
+    '''      
+    
+    novelty = 0   
+    semisupervised = 0 
+    if (np.all(y_seen==0)) | (y_seen is None):
+        novelty = 1
+        X_unseen_p = X_unseen
+        y_seen = y_unseen
+        print('Novelty detection mode.')
+        conds = (X_unseen is not None and y_unseen is not None)
+        assert conds,'In novelty detection you need to input the unseen data sets.'
+    elif y_unseen is not None and X_unseen is not None:
+        semisupervised = 1
 #        print('Semi-supervised option is not available for novelty detection.')
         X_unseen_p = None
-        assert not X_unseen is None,'X_unseen is empty!'
-    else:
+        print('Semi-supervised outlier detection mode.')
+    elif X_seen is not None:
         X_unseen_p = X_unseen
-
+        print('Unsupervised outlier detection mode.')
+    else:
+        assert 0, 'The configuration is not recognized!'
+        
     aucs,mccs,rwss,conf = [],[],[],[]
 
     for nn in n_neighbors:
@@ -141,13 +159,32 @@ def grid_run_iforest(X_seen,y_seen,
                      max_features= [0.2,0.5,1.0],
                      bootstrap=[False,True]):
                  
-    semisupervised = not y_unseen is None
-    if semisupervised:
+    '''         
+    This function is able to deal with three modes:
+    1- Unsupervised outlier detection 
+    2- Semi-supervised outlier detection
+    3- Novelty detection  
+    '''      
+    
+    novelty = 0   
+    semisupervised = 0 
+    if (np.all(y_seen==0)) | (y_seen is None):
+        novelty = 1
+        X_unseen_p = X_unseen
+        y_seen = y_unseen
+        print('Novelty detection mode.')
+        conds = (X_unseen is not None and y_unseen is not None)
+        assert conds,'In novelty detection you need to input the unseen data sets.'
+    elif y_unseen is not None and X_unseen is not None:
+        semisupervised = 1
 #        print('Semi-supervised option is not available for novelty detection.')
         X_unseen_p = None
-        assert not X_unseen is None,'X_unseen is empty!'
-    else:
+        print('Semi-supervised outlier detection mode.')
+    elif X_seen is not None:
         X_unseen_p = X_unseen
+        print('Unsupervised outlier detection mode.')
+    else:
+        assert 0, 'The configuration is not recognized!'
 
     aucs,mccs,rwss,conf = [],[],[],[]
 
@@ -360,13 +397,32 @@ def grid_run_drama(X_seen,y_seen,
                    metrics = all_metrics,
                    n_split = 1):
                    
-    semisupervised = not y_unseen is None                 
-    if semisupervised:
+    '''         
+    This function is able to deal with three modes:
+    1- Unsupervised outlier detection 
+    2- Semi-supervised outlier detection
+    3- Novelty detection  
+    '''      
+    
+    novelty = 0   
+    semisupervised = 0 
+    if (np.all(y_seen==0)) | (y_seen is None):
+        novelty = 1
+        X_unseen_p = X_unseen
+        y_seen = y_unseen
+        print('Novelty detection mode.')
+        conds = (X_unseen is not None and y_unseen is not None)
+        assert conds,'In novelty detection you need to input the unseen data sets.'
+    elif y_unseen is not None and X_unseen is not None:
+        semisupervised = 1
 #        print('Semi-supervised option is not available for novelty detection.')
         X_unseen_p = None
-        assert not X_unseen is None,'X_unseen is empty!'
-    else:
+        print('Semi-supervised outlier detection mode.')
+    elif X_seen is not None:
         X_unseen_p = X_unseen
+        print('Unsupervised outlier detection mode.')
+    else:
+        assert 0, 'The configuration is not recognized!'
 
     aucs,mccs,rwss,conf = [],[],[],[]
 

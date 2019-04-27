@@ -120,6 +120,7 @@ def data_split(X,y,n_train):
     nhalf = iinds.shape[0]//2
 
     if oinds.shape[0]<=n_train:
+        print('n_train has to be less than all samples!')
         exit()
 
     np.random.shuffle(iinds)
@@ -547,7 +548,7 @@ def corrector(outliers):
 def dic2array(x):
     vals = []
     flds = []
-    for k,v in x.iteritems():
+    for k,v in x.items():
         vals.append(v)
         flds.append((k,float))
     vals = np.array(vals).T
