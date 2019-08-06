@@ -16,6 +16,12 @@ from sklearn.neighbors import LocalOutlierFactor
 from sklearn.ensemble import IsolationForest
 from sklearn.neighbors import VALID_METRICS
 
+import warnings
+warnings.filterwarnings("ignore", message='default contamination parameter 0.1 will change in version 0.22 to "auto". This will change the predict method behavior.')
+warnings.filterwarnings("ignore", message='Data with input dtype float64 was converted to bool by check_pairwise_arrays.')
+warnings.filterwarnings("ignore", message='Invalid value encountered in percentile')
+
+
 DEBUG = True
 all_metrics = ['cityblock','L2','L4','braycurtis',
            'canberra','chebyshev','correlation','mahalanobis',
@@ -363,6 +369,9 @@ class D_Drama(object):
             
         self.splitter = Splitter(X_seen, reducer = dim_rs[drt_name], clustering = clustering, z_dim=z_dim)
         self.X_seen = X_seen
+
+    def split(self,n_split=1):  
+        self.splitter.split(n_split,verbose=0,training_epochs=20)
         
     def __call__(self,X_unseen=None,
                  metrics=all_metrics,
