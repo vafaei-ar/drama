@@ -5,17 +5,16 @@ Installation:
 
 The project is hosted on GitHub. Get a copy by running:
 
-$ git clone https://github.com/vafaei-ar/drama.git
 
 Install the package using:
 
-$ cd drama
+'''
 
-$ pip install -r requirements.txt 
+$ pip install git+https://github.com/vafaei-ar/drama.git
 
-$ python setup.py install
+'''
 
-**DRAMA** is a flexible and expendable outlier detection package for 
+**DRAMA** is a flexible and expendable outlier detection package.
 
 
 <p align="center">
@@ -31,6 +30,6 @@ $ python setup.py install
 _Python library for _
 
 
-**Documentation:** http://
+**Documentation:** (will be added soon)
 
-**Citing DRAMA:** 
+**Citing DRAMA:** https://arxiv.org/abs/1909.04060
