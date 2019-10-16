@@ -29,9 +29,9 @@ all_metrics = ['cityblock','L2','L4','braycurtis',
 
 def sk_check(X_train,X_test,y_test,o_list):
     
-    f_f = [neighbors.LocalOutlierFactor(n_neighbors=5),\
-    neighbors.LocalOutlierFactor(n_neighbors=10),\
-    neighbors.LocalOutlierFactor(n_neighbors=35),\
+    f_f = [LocalOutlierFactor(n_neighbors=5),\
+    LocalOutlierFactor(n_neighbors=10),\
+    LocalOutlierFactor(n_neighbors=35),\
     IsolationForest(max_samples='auto')]
     f_name = ['LOF5','LOF10','LOF35','i-forest']
 
