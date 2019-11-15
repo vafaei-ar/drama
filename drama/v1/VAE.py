@@ -2,17 +2,22 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+try:
+    import tensorflow.compat.v1 as tf
+    tf.disable_v2_behavior()
+except:
+    import tensorflow as tf
+
 import numpy as np
 import gc
-import tensorflow as tf
 from .utils import *
-from tensorflow.contrib.layers import xavier_initializer
+from tensorflow.compat.v1.keras.initializers import glorot_uniform
 
 class VariationalAutoEncoder(object):
 
 	def __init__(self,  network_architecture, 
 											transfer_fct=tf.nn.relu,
-											initializer = xavier_initializer(),
+											initializer = glorot_uniform(),
 		           				learning_rate = 0.001):
 
 		self.nn_rec, self.nn_gen = network_architecture[0], network_architecture[1]

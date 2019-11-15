@@ -355,9 +355,7 @@ class D_Drama(object):
                  clustering=None,
                  z_dim=2):
                  
-        dim_rs ={'DAE1D':'DAE1D','DVAE1D':'DVAE1D','CAE1D':'CAE1D','CVAE1D':'CVAE1D', 
-                 'CAE2D':'CAE2D','CVAE2D':'CVAE2D', 
-                 'PCA':PCA(n_components=z_dim),'NMF':NMF(n_components=z_dim), 
+        dim_rs ={'AE':'AE','VAE':'VAE','PCA':PCA(n_components=z_dim),'NMF':NMF(n_components=z_dim), 
                  'FastICA':FastICA(n_components=z_dim, max_iter=1000)}
 
         if drt_name not in dim_rs.keys():   		
@@ -402,11 +400,9 @@ class D_Drama(object):
             
         return outliers
 
-#'DAE1D','DVAE1D','CAE1D','CVAE1D','CAE2D','CVAE2D'
-
 def grid_run_drama(X_seen,y_seen,
                    X_unseen=None,y_unseen=None,
-                   drt_list = ['DAE1D','DVAE1D','PCA','NMF','FastICA'],
+                   drt_list = ['AE','VAE','PCA','NMF','FastICA'],
                    metrics = all_metrics,
                    n_split = 1):
                    

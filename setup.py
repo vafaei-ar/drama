@@ -26,7 +26,7 @@ setup(
     description='Outlier detection',
     author='Alireza',
     url='https://github.com/vafaeiar/drama',
-    packages=find_packages(PACKAGE_PATH, "drama"),
+    packages=find_packages(PACKAGE_PATH, "drama")+['drama.v1'],
     package_dir={'drama': 'drama'},
     include_package_data=True,
     install_requires=requires,
