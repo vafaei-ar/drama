@@ -190,6 +190,7 @@ class AutoEncoderBase(object):
         purge = list(vars(self).keys())
         for i in purge:
             exec('del self.'+i)
+        K.clear_session()
         gc.collect()
 
 
