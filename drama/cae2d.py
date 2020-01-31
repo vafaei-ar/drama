@@ -154,21 +154,25 @@ def cond2d_arch_decoder(encoded,
     d_shape = decoded.get_shape().as_list()
     delta_x = d_shape[1] - decoded_dim_x
     delta_y = d_shape[2] - decoded_dim_y
+    
+    assert (delta_x>=0 and delta_y>=0),'Dimension error! The architecture input-output is not compatible!'
 
     d_crop_x = int(delta_x/2)
     d_crop_y = int(delta_y/2)
-    
-    if delta_x%2==0:
-        d_crop_x = (d_crop_x,d_crop_x)
-    else:
-        d_crop_x = (d_crop_x,d_crop_x+1)
+
+    if delta_x!=0 or delta_y!=0:
         
-    if delta_y%2==0:
-        d_crop_y = (d_crop_y,d_crop_y)
-    else:
-        d_crop_y = (d_crop_y,d_crop_y+1)
+        if delta_x%2==0:
+            d_crop_x = (d_crop_x,d_crop_x)
+        else:
+            d_crop_x = (d_crop_x,d_crop_x+1)
+            
+        if delta_y%2==0:
+            d_crop_y = (d_crop_y,d_crop_y)
+        else:
+            d_crop_y = (d_crop_y,d_crop_y+1)
     
-    decoded = Cropping2D(cropping=(d_crop_x,d_crop_y))(decoded)
+        decoded = Cropping2D(cropping=(d_crop_x,d_crop_y))(decoded)
     
     return decoded
 
@@ -282,7 +286,8 @@ class ConvolutionalVariationalAutoEncoder2D(AutoEncoderBase):
                  filters = 4,
                  filter_factor = 2,
                  kernel_size = (5,5),
-                 strides = (1,1),
+                 strides_en = (1,1),
+                 strides_de = (2,2),
                  pool_size = (2,2),
                  upsample_size = False,
                  activation = 'relu',
@@ -306,7 +311,8 @@ class ConvolutionalVariationalAutoEncoder2D(AutoEncoderBase):
         self.filters = filters
         self.filter_factor = filter_factor
         self.kernel_size = kernel_size
-        self.strides = strides
+        self.strides_en = strides_en
+        self.strides_de = strides_de
         self.pool_size = pool_size
         self.upsample_size = upsample_size
         self.transpose = transpose
@@ -328,7 +334,7 @@ class ConvolutionalVariationalAutoEncoder2D(AutoEncoderBase):
                                              filters = self.filters,
                                              filter_factor = self.filter_factor,
                                              kernel_size = self.kernel_size,
-                                             strides = self.strides,
+                                             strides = self.strides_en,
                                              pool_size = self.pool_size,
                                              activity_regularizer = self.activity_regularizer)
 
@@ -349,7 +355,7 @@ class ConvolutionalVariationalAutoEncoder2D(AutoEncoderBase):
                                       filters = self.x_shape[-1],
                                       filter_factor = self.filter_factor,
                                       kernel_size = self.kernel_size,
-                                      strides = self.strides,
+                                      strides = self.strides_de,
                                       upsample_size = self.upsample_size,
                                       activity_regularizer = self.activity_regularizer,
                                       transpose = self.transpose)
@@ -374,10 +380,6 @@ class ConvolutionalVariationalAutoEncoder2D(AutoEncoderBase):
             x = np.expand_dims(x,-1)
         assert (x.shape[1]==self.input_dim_x and x.shape[2]==self.input_dim_y),'Input dimension problem!'
         return self._encoder.predict(x)
-
-
-
-
 
 
 

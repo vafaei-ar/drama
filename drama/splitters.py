@@ -11,14 +11,41 @@ from .cae2d import *
 from .utils import *
 
 class Splitter(object):
-    def __init__(self, X_train, reducer, clustering, z_dim=2, network_architecture=None):
+    def __init__(self, X_train, reducer, clustering, data_dim=1, z_dim=2, network_architecture=None):
 
         self.X_train,self.xmin,self.xmax = standard(X_train)
-        self.n_samples, self.n_ftrs = X_train.shape
+        
+        self.ndim = X_train.ndim
+        
+        self.convolutional = False
+        if type(reducer) is str:
+            if reducer.upper()[0] == 'C':
+                self.convolutional = True
+            
+                if data_dim==1:
+                    assert self.ndim==3, 'Input dimension error! ndim has to be 3 but it is {}'.format(self.ndim)
+                    self.n_samples, self.n_ftrs, self.channel = X_train.shape
+                    
+                elif data_dim==2:
+                    assert self.ndim==4, 'Input dimension error! ndim has to be 4 but it is {}'.format(self.ndim)
+                    self.n_samples, self.n_ftrs_x, self.n_ftrs_y, self.channel = X_train.shape
+                    self.n_ftrs = self.n_ftrs_x*self.n_ftrs_y
+                    
+                else:
+                    assert 0,'Unsupported data dimension!'
+                    
+                assert self.channel==1, 'More than one channel is not supported!'
+            else:
+                assert data_dim==1,'Only 1 dimensional data_dim is supported.'
+                self.n_samples, self.n_ftrs = X_train.shape
+        else:
+            assert data_dim==1,'Only 1 dimensional data_dim is supported.'
+            self.n_samples, self.n_ftrs = X_train.shape
+        
         self.z_dim = z_dim
         if reducer=='none':
             self.z_dim = self.n_ftrs
-        if network_architecture is None:
+        if network_architecture is None and not self.convolutional:
             network_architecture = [[self.n_ftrs,self.n_ftrs//2,self.z_dim],[self.z_dim,self.n_ftrs//2,self.n_ftrs]]
         self.network_architecture = network_architecture
         self.reducer = reducer
@@ -69,26 +96,26 @@ class Splitter(object):
             
 # Convolutional Autoencoder 1D
         elif reducer=='CAE1D':
-            model = ConvolutionalAutoEncoder1D(input_dim,
-                                               latent_dim)
+            model = ConvolutionalAutoEncoder1D(input_dim = self.n_ftrs,
+                                               latent_dim = self.z_dim)
             
 # Convolutional Variational Autoencoder 1D
         elif reducer=='CVAE1D':
-            model = ConvolutionalVariationalAutoEncoder1D(input_dim,
-                                                          latent_dim)
+            model = ConvolutionalVariationalAutoEncoder1D(input_dim = self.n_ftrs,
+                                                          latent_dim = self.z_dim)
 
 # Convolutional Autoencoder 2D
         elif reducer=='CAE2D':
-            model = ConvolutionalAutoEncoder2D(input_dim_x,
-                                               input_dim_y,
-                                               latent_dim)
+            model = ConvolutionalAutoEncoder2D(input_dim_x = self.n_ftrs_x,
+                                               input_dim_y = self.n_ftrs_y,
+                                               latent_dim = self.z_dim)
             
 # Convolutional Variational Autoencoder 2D
         elif reducer=='CVAE2D':
-            model = ConvolutionalVariationalAutoEncoder2D(input_dim_x,
-                                                          input_dim_y,
-                                                          latent_dim)
-
+            model = ConvolutionalVariationalAutoEncoder2D(input_dim_x = self.n_ftrs_x,
+                                                          input_dim_y = self.n_ftrs_y,
+                                                          latent_dim = self.z_dim)
+            
 # Without dimensionality reduction
         elif reducer=='NONE':
             model = n_model()
@@ -155,15 +182,24 @@ class and has fit, transform and inverse_transform methods.'
                 pts = z_mu[label_out==j]
                 if pts.shape[0]!=0:
                     mean_points[j,:] = np.mean(pts,axis=0)
-                    mean_components[j,:] = model.decoder((mean_points[j,:]).reshape(1,self.z_dim))
+                    
+                    if self.convolutional:
+                        mean_components[j,:] = model.decoder((mean_points[j,:]).reshape(1,self.z_dim)).reshape(-1,self.n_ftrs)
+                    else:
+                        mean_components[j,:] = model.decoder((mean_points[j,:]).reshape(1,self.z_dim))
 
                     if self.z_dim==2:
-                        dense_points[j,:] = dense_point(pts)                             
-                        dense_components[j,:] = model.decoder((dense_points[j,:]).reshape(1,self.z_dim))
+                        dense_points[j,:] = dense_point(pts)  
+                        if self.convolutional:                           
+                            dense_components[j,:] = model.decoder((dense_points[j,:]).reshape(1,self.z_dim)).reshape(-1,self.n_ftrs)
+                        else:
+                            dense_components[j,:] = model.decoder((dense_points[j,:]).reshape(1,self.z_dim))
     #############################################
 
             for j in [0,1]:
                 X_sub = X[label_out==j]*xmax+xmin
+                if self.convolutional:
+                    X_sub = X_sub.reshape(-1,self.n_ftrs)
                 if X_sub.shape[0]>1:
                     mean_vector[j,:] = np.mean(X_sub,axis=0)
                     covariance[j,:] = Cov_mat(X_sub)

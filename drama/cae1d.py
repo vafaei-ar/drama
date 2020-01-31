@@ -136,12 +136,15 @@ def cond1d_arch_decoder(encoded,
 
     delta_n = decoded.get_shape().as_list()[1] - decoded_dim
 
-    d_crop = int(delta_n/2)
-    if delta_n%2==0:
-        decoded = Cropping1D((d_crop,d_crop))(decoded)
-    else:
-        decoded = Cropping1D((d_crop,d_crop+1))(decoded)
-    
+    assert delta_n>=0,'Dimension error! The architecture input-output is not compatible!'
+
+    if delta_n!=0:
+        d_crop = int(delta_n/2)
+        if delta_n%2==0:
+            decoded = Cropping1D((d_crop,d_crop))(decoded)
+        else:
+            decoded = Cropping1D((d_crop,d_crop+1))(decoded)
+        
     return decoded
 
 class ConvolutionalAutoEncoder1D(AutoEncoderBase):

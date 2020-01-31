@@ -93,6 +93,8 @@ class AutoEncoderBase(object):
             self.reconstruction_loss = self.input_dim*self.loss(K.flatten(self.input), K.flatten(self.decoded))
             self.kl_loss = 1 + self.z_log_var - K.square(self.z_mean) - K.exp(self.z_log_var)
             self.kl_loss = -0.5*K.sum(self.kl_loss, axis=-1)
+#            self.clu_loss = 
+#            self.clu_loss = K.sum(self.clu_loss, axis=-1)
             self.vae_loss = K.mean(self.reconstruction_loss + self.kl_loss)
             self.autoencoder.add_loss(self.vae_loss)
             self.autoencoder.compile(optimizer=self.optimizer)
@@ -130,7 +132,7 @@ class AutoEncoderBase(object):
             y = None
         else:
             y = x
-            
+        
         self.autoencoder.fit(x, y,
                              epochs=training_epochs,
                              batch_size=self.batch_size,

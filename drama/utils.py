@@ -81,6 +81,7 @@ def plot_table(arr,drts,metrs,save=False,prefix=''):
     crt = ['AUC','MCC','RWS']
     n_drt = len(drts)
     n_metr = len(metrs)
+    n_tot = n_drt*n_metr
     for iii in range(3):
         mtx = arr[:,:,iii]
 
@@ -92,7 +93,7 @@ def plot_table(arr,drts,metrs,save=False,prefix=''):
 
         width, height = mtx.shape
 
-        rnk = 50-mtx.ravel().argsort().argsort().reshape(mtx.shape)
+        rnk = n_tot-mtx.ravel().argsort().argsort().reshape(mtx.shape)
 
         for x in range(width):
             for y in range(height):
