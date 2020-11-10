@@ -40,10 +40,12 @@ You can find some examples:
 **Citing DRAMA:** 
 
 ``
-@article{sadr2019flexible,
+@inproceedings{sadr2019flexible,
   title={A Flexible Framework for Anomaly Detection via Dimensionality Reduction},
   author={Sadr, Alireza Vafaei and Bassett, Bruce A and Kunz, Martin},
-  journal={arXiv preprint arXiv:1909.04060},
-  year={2019}
+  booktitle={2019 6th International Conference on Soft Computing \& Machine Intelligence (ISCMI)},
+  pages={106--110},
+  year={2019},
+  organization={IEEE}
 }
 ``

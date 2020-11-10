@@ -126,7 +126,7 @@ class AutoEncoder(object):
 	def decoder(self, Z):
 		return self.sess.run(self.decoder_op,feed_dict={self.Z: Z})
 
-	def train(self, X, training_epochs=10, verbose=True): 
+	def train(self, X, training_epochs=20, verbose=True): 
 		n_samples = X.shape[0]
 
 		total_batch = int(n_samples / self.batch_size)
