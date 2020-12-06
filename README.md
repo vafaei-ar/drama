@@ -14,10 +14,14 @@ Install the package using:
 
 ``$ pip install git+https://github.com/vafaei-ar/drama.git``
 
+
+<p align="center">
+  <img src="./images/flow.jpg" width="800"/>
+</p>
+
 <p align="center">
   <img src="./images/pipeline.jpg" width="800"/>
 </p>
-
 
 <p align="center">
   <img src="./images/splitting.jpg" width="700"/>
@@ -30,6 +34,8 @@ _Python library for _
 **Documentation:** 
 
 You can find some examples:
+
+- [0_mnist_example.ipynb](https://github.com/vafaei-ar/drama/blob/master/notebooks/0_mnist_example.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/vafaei-ar/drama/blob/master/notebooks/0_mnist_example.ipynb)
 
 - [1_Synthetic_signals.ipynb](https://github.com/vafaei-ar/drama/blob/master/notebooks/1_Synthetic_signals.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/vafaei-ar/drama/blob/master/notebooks/1_Synthetic_signals.ipynb)
 

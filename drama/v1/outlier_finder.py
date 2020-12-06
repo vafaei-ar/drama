@@ -398,7 +398,21 @@ class D_Drama(object):
     #        outliers['real'] = outliers_real(X_unseen,splitter,metrics)
     #        outliers['latent'] = outliers_latent(splitter,metrics)
             
-        return outliers
+        return outliers['real']
+
+    def fit(self,X_seen=None,
+                 n_split=1,space='real',
+                 verbose = 0,
+                 training_epochs=20):  
+        self.splitter.split(n_split,verbose=verbose,training_epochs=training_epochs)
+
+    def predict(self,X,metrics=all_metrics):
+        y = outliers_real(X,self.splitter,metrics)
+        if isinstance(metrics, str):
+            return y[metrics]
+        return y
+
+
 
 def grid_run_drama(X_seen,y_seen,
                    X_unseen=None,y_unseen=None,
@@ -444,7 +458,8 @@ def grid_run_drama(X_seen,y_seen,
         for nsp in range(n_split):
             outliers_rep = d_drama(X_unseen=X_unseen_p, n_split = 1)
             for metr in metrics:
-                o1 = outliers_rep['real'][metr]
+                o1 = outliers_rep[metr]
+#                o1 = outliers_rep['real'][metr]
     #            o2 = outliers_rep['latent'][metr]
                 
                 auc = roc_auc_score(y_seen==1, o1)
